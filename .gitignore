@@ -1,0 +1,6 @@
+src/data/databases/*
+!src/data/databases/.gitkeep
+src/data/dataframes/*
+!src/data/dataframes/.gitkeep
+src/math/MagicXPConfig.json
+src/math/LevelScaledData.json
