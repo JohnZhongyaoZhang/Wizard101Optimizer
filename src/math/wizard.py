@@ -3,7 +3,7 @@ import pandas as pd
 from collections import Counter
 
 class Wizard:
-    def __init__(self, school: str, level: int, gear: pd.DataFrame, weave: str | None = None):
+    def __init__(self, school: str, level: int, gear: pd.DataFrame, weave: str | None = "Universal"):
         self.wizardStats = wizardStats()
         self.school = school
         self.weave = weave

@@ -10,6 +10,8 @@ import src.data.dataConstruction.database as database
 import pandas as pd
 import numpy as np
 
+import itertools
+
 import os
 
 FIND_ITEM_QUERY = """
@@ -74,9 +76,10 @@ class Gear:
         
         self.db = sqlite3.connect(os.path.join(DATABASE_ROOT, 'playerGear.db'))
         self.id_list = None
-        self.gearBlacklist = ['NV_Polymorph_Stats_Ring','Test','DONOTUSE', 'MinionDeck', 'GR_AZ_Parasaur_', 'BR_CL_Polymorph']
-        self.setBonusBlacklist = ['Display Name']
         self.schoolList = ['Fire', 'Ice', 'Storm', 'Balance', 'Life', 'Myth', 'Death', 'Shadow', 'Moon']
+        self.gearBlacklist = ['NV_Polymorph_Stats_Ring','Test','DONOTUSE', 'MinionDeck', 'GR_AZ_Parasaur_', 'BR_CL_Polymorph']
+        self.jewelBlacklist = [f"{a}-{b}" for a, b in itertools.permutations(self.schoolList, 2)]
+        self.setBonusBlacklist = ['Display Name']
         self.universalstats= ['Damage','Accuracy','Pierce','Resist','Crit Rating','Block Rating', 'Pip Conversion Rating']
 
     def changeDB(self,db):
@@ -102,7 +105,7 @@ class Gear:
 
         # gearBlacklisted pieces removed
         attributes['Name'] = row[2].decode() #1
-        if any([x in row[2].decode() for x in self.gearBlacklist]):
+        if any([x in attributes['Name'] for x in self.gearBlacklist]):
             return {}
         
         attributes['Display'] = self.db.execute(DISPLAY_NAME_QUERY, (item,)).fetchone()[0] #2
@@ -113,6 +116,11 @@ class Gear:
         #attributes['Rarity'] = database.translate_rarity(row[4])
         attributes['Jewels'] = database.format_sockets(row[5]) #4
         attributes['Kind'] = database.get_item_str(database.ItemKind(row[6])) #5
+
+        # remove test realm dual pierce jewels
+        if attributes['Kind'] == "Jewel":
+            if any([x in attributes['Name'] for x in self.jewelBlacklist]):
+                return {}
 
         # Remove none permanent mounts
         if attributes['Kind'] == "Mount" and " day)" in attributes['Display'].lower():

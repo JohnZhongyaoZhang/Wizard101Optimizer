@@ -1,6 +1,3 @@
-from pandas import Series
-from pandas import DataFrame
-import numpy as np
 import pandas as pd
 
 from src.data.dataConstruction.gear import Gear
@@ -8,10 +5,7 @@ from src.data.dataConstruction.mobs import Mobs
 
 from src.math.wizard import Wizard
 
-import src.data.dataConstruction.database as database
 import os
-
-import time
 
 DATAFRAME_ROOT = os.path.join('src', 'data', 'dataframes')
 
@@ -20,6 +14,7 @@ class Optimizer:
         self.level = 180
         self.levellowerbound = 0
         self.school = "Storm"
+        self.weave = "Universal"
         self.target = "PvP"
         #self.spells = []
 
