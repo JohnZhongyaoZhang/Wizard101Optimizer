@@ -6,6 +6,8 @@ import pandas as pd
 from src.data.dataConstruction.gear import Gear
 from src.data.dataConstruction.mobs import Mobs
 
+from src.math.wizard import Wizard
+
 import src.data.dataConstruction.database as database
 import os
 
@@ -15,7 +17,7 @@ DATAFRAME_ROOT = os.path.join('src', 'data', 'dataframes')
 
 class Optimizer:
     def __init__(self):
-        self.level = 170
+        self.level = 180
         self.levellowerbound = 170
         self.school = "Storm"
         self.target = "PvP"
@@ -295,18 +297,33 @@ def main():
     TheOptimizer = Optimizer()
     #TheOptimizer.maximizeOneStat()
 
-    TheOptimizer.gearTable = TheOptimizer.removeUselessItems()
-    TheOptimizer.gearTable = TheOptimizer.getAllUniqueItems()
-    TheOptimizer.gearTable = TheOptimizer.removeBadSockets()
-    TheOptimizer.gearTable = TheOptimizer.getShadPieces()
-    TheOptimizer.gearTable = TheOptimizer.getTopTierPieces()
+    #TheOptimizer.gearTable = TheOptimizer.removeUselessItems()
+    #TheOptimizer.gearTable = TheOptimizer.getAllUniqueItems()
+    #TheOptimizer.gearTable = TheOptimizer.removeBadSockets()
+    #TheOptimizer.gearTable = TheOptimizer.getShadPieces()
+    #TheOptimizer.gearTable = TheOptimizer.getTopTierPieces()
 
     #TheOptimizer.gearTable = TheOptimizer.removeSuboptimalItems2()
     #TheOptimizer.maximizeOneStat()
     
-    TheOptimizer.combinationChecker()
+    #TheOptimizer.combinationChecker()
 
-    print(TheOptimizer.gearTable)
+    #print(TheOptimizer.gearTable[(TheOptimizer.gearTable['Kind'] == "Weapon") & (TheOptimizer.gearTable['School'] == "Storm") & (TheOptimizer.gearTable['Level'] == 180)])
+    
+    gearSet = ['Drop-DM-Hats-L180-SS-003-01',
+                   'Drop-DM-Robe-L180-SS-003-01',
+                   'Drop-DM-Shoes-L180-SS-003-01',
+                   'Drop-DM-Amulet-L180-SS-003-01',
+                   'Drop-DM-Wands-L180-SS-003-01',
+                   'Drop-DM-Athames-L180-SS-003-01',
+                   'Drop-DM-Rings-L180-SS-003-01',
+                   'Drop-DM-Deck-L180-SS-003-01']
+    
+    stormGear = TheOptimizer.gearTable[TheOptimizer.gearTable["Name"].isin(gearSet)].copy()
+    #print(stormGear)
+    stormWizard = Wizard(school="Storm",level=180,gear=stormGear,jewels=None)
+    summedStats = stormWizard.statSummation()
+    print(summedStats)
     quit()
 
 main()

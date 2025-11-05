@@ -69,5 +69,4 @@ def main():
     test = shadMath()
     test.createFile(1.5,0,"PvE")
 
-
-main()
+#main()

@@ -1,6 +1,6 @@
-import database as db
 import json
-import math
+import pandas as pd
+import os
 
 SCHOOLS = ["Fire", "Ice", "Storm", "Balance", "Myth", "Life", "Death"]
 
@@ -133,8 +133,12 @@ LEVEL_SCALED_DATA_TABLE = {
     "m_canonicalShadowPipRating": f"Shadow Pip Stat Rating",
     "m_canonicalAllArchmastery": f"Archmastery Rating",
     "m_maximumPips": f"Maximum Pips",
-    "m_maximumPowerPips": f"Maximum Power Pips"
+    "m_maximumPowerPips": f"Maximum Power Pips",
+    "m_school": f"School",
+    "m_level": f"Level"
 }
+
+FILE_ROOT = os.path.join("src", "math")
 
 class wizardStats:
     def __init__(self):
@@ -142,27 +146,24 @@ class wizardStats:
         self.baseStats = self.createBaseStats()
 
     def createCaps(self):
-        tempData = {}
-        statCaps = json.load(open('LevelScaledData.json'))['m_levelScaledInfoList']
+        tempData = []
+        statCaps = json.load(open(os.path.join(FILE_ROOT, 'LevelScaledData.json')))['m_levelScaledInfoList']
 
         statsToStandardize = ["Accuracy", "Damage", "Resist", "Pierce", "Healing", "Power Pip Chance"]
 
         for caps in statCaps:
-            levelAndSchool = (caps['m_level'], caps['m_school'])
-            del caps["m_level"], caps["m_school"], caps['$__type']
+            #del caps["m_level"], caps["m_school"], caps['$__type']
+            del caps['$__type']
             value = {LEVEL_SCALED_DATA_TABLE.get(k, k): v for k, v in caps.items()}
             for stat in value:
                 if any(statToStandardize in stat for statToStandardize in statsToStandardize) and "Flat Damage" not in stat:
                     value[stat] = round(value[stat] * 100)
-            tempData[levelAndSchool] = value
-        statCaps = tempData
+            tempData.append(value)
+        statCaps = pd.DataFrame(tempData).fillna(0)
         return statCaps
     
-    def getCaps(self, level, school):
-        return self.statCaps[(level, school)]
-    
     def createBaseStats(self):
-        baseStats = json.load(open('MagicXPConfig.json'))
+        baseStats = json.load(open(os.path.join(FILE_ROOT, 'MagicXPConfig.json')))
         del baseStats['m_encounterXPFactors'], baseStats['m_maxSchoolLevel'], baseStats['m_experienceBonus'], baseStats['m_schoolOfFocusBonus'], baseStats['m_levelsConfig']
         
         universalStartingStats = {}
@@ -175,24 +176,30 @@ class wizardStats:
                                             "Shadow Pip Stat Rating": entry["m_shadowPipRating"],
                                             "Archmastery Rating": entry["m_archmastery"]}
 
-        schoolSpecificStartingStats = {}
+        schoolSpecificStartingStats = []
 
         for entry in baseStats['m_classInfo']:
             schoolName = entry['m_className']
             if schoolName in SCHOOLS:
                 for entry2 in entry['m_classLevelInfo']:
                     level = entry2['m_level']
-                    schoolSpecificStartingStats[(level, schoolName)] = {"Health": entry2["m_hitpoints"],
-                                                                         f"{schoolName} Pip Conversion Rating": entry2[f"m_pipConversionRating{schoolName}"]}
-                    schoolSpecificStartingStats[(level, schoolName)] |= universalStartingStats[level]
+                    if level <= 0:
+                        continue
+                    schoolSpecificStartingStats.append({"Level": level,
+                                                        "School": schoolName,
+                                                        "Health": entry2["m_hitpoints"],
+                                                        f"{schoolName} Pip Conversion Rating": entry2[f"m_pipConversionRating{schoolName}"]} | universalStartingStats[level])
 
-        return schoolSpecificStartingStats
+        return pd.DataFrame(schoolSpecificStartingStats).fillna(0)
     
-    def getBaseStats(self, level, school):
-        return self.baseStats[(level, school)]
+    def getBaseStats(self, school: str, level: int):
+        return self.baseStats[(self.baseStats['School'] == school) & (self.baseStats['Level'] == level)]
+
+    def getCaps(self, school: str, level: int):
+        return self.statCaps[(self.statCaps['School'] == school) & (self.statCaps['Level'] == level)]
 
 def main():
     woop = wizardStats()
-    print(woop.getBaseStats(180,"Myth"))
-    print(woop.getCaps(180, "Myth"))
+    print(woop.getBaseStats("Storm", 180))
+    #print(woop.getCaps("Storm", 180))
 main()
