@@ -18,14 +18,14 @@ DATAFRAME_ROOT = os.path.join('src', 'data', 'dataframes')
 class Optimizer:
     def __init__(self):
         self.level = 180
-        self.levellowerbound = 170
+        self.levellowerbound = 0
         self.school = "Storm"
         self.target = "PvP"
         #self.spells = []
 
         self.deckaDeckAllowed = False
         self.PvPOnlyAllowed = False
-        self.universalGearAllowed = False
+        self.universalGearAllowed = True
 
         #self.kindsconsidered = ["Hat", "Robe", "Shoes", "Weapon", "Athame", "Amulet", "Ring", "Deck", "Mount"]
         self.kindsconsidered = ["Hat", "Robe", "Shoes", "Weapon", "Athame", "Amulet", "Ring", "Deck"]
@@ -317,13 +317,19 @@ def main():
                    'Drop-DM-Wands-L180-SS-003-01',
                    'Drop-DM-Athames-L180-SS-003-01',
                    'Drop-DM-Rings-L180-SS-003-01',
-                   'Drop-DM-Deck-L180-SS-003-01']
+                   'Drop-DM-Deck-L180-SS-003-01',
+                   'Mount-ClockworkSteed-Dyeable-001']
     
+    #print(TheOptimizer.gearTable[TheOptimizer.gearTable['Name'] == "Mount-ClockworkSteed-Dyeable-001"])
+    #print(TheOptimizer.gearTable[TheOptimizer.gearTable['Kind'] == "Mount-ClockworkSteed-Dyeable-001"])
+
     stormGear = TheOptimizer.gearTable[TheOptimizer.gearTable["Name"].isin(gearSet)].copy()
-    #print(stormGear)
-    stormWizard = Wizard(school="Storm",level=180,gear=stormGear,jewels=None)
-    summedStats = stormWizard.statSummation()
+    print(stormGear)
+    stormWizard = Wizard(school="Storm",level=180,gear=stormGear)
+    summedStats = stormWizard.gearStatSummation()
+    jewels = stormWizard.jewelSummation()
     print(summedStats)
+    print(jewels)
     quit()
 
 main()

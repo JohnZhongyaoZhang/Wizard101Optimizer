@@ -156,14 +156,14 @@ class Mobs:
         table['Secondary School'] = table['Secondary School'].fillna('None')
         table.fillna(0,inplace=True)
 
-        for stat in self.universalstats:
-            for school in self.schoolList:
-                columntitle= school + " " +stat
-                if columntitle in table.columns:
-                    table[columntitle]+=table[stat]
+        #for stat in self.universalstats:
+        #    for school in self.schoolList:
+        #        columntitle= school + " " +stat
+        #        if columntitle in table.columns:
+        #            table[columntitle]+=table[stat]
 
-        table.to_pickle(os.path.join(DATABASE_ROOT, 'allthemobs.pkl'))
-        table.to_csv(os.path.join(DATABASE_ROOT, 'allthemobs.csv'),index=False)
+        table.to_pickle(os.path.join(DATAFRAME_ROOT, 'allthemobs.pkl'))
+        table.to_csv(os.path.join(DATAFRAME_ROOT, 'allthemobs.csv'),index=False)
 
         end = time.time()
         print(end-start)

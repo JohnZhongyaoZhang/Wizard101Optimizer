@@ -1,17 +1,19 @@
 from src.math.statCaps import wizardStats
 import pandas as pd
+from collections import Counter
 
 class Wizard:
-    def __init__(self, school: str, level: int, gear: pd.DataFrame, jewels: pd.DataFrame):
+    def __init__(self, school: str, level: int, gear: pd.DataFrame, weave: str | None = None):
         self.wizardStats = wizardStats()
         self.school = school
+        self.weave = weave
         self.level = level
         self.gear = gear
-        self.jewels = jewels
+        self.jewels = None
         self.pet = None
         self.stats = {}
 
-    def statSummation(self):
+    def gearStatSummation(self):
         # get base stats
         baseStats = self.wizardStats.getBaseStats(school=self.school,level=self.level).select_dtypes(include="number").squeeze()
 
@@ -24,4 +26,14 @@ class Wizard:
         totalStats = totalStats[totalStats != 0]
         self.stats = totalStats
 
-        return self.stats        
+        return self.stats
+
+    def jewelSummation(self):
+        totalJewels = '|'.join(self.gear['Jewels'].astype(str)).split('|')
+        totalJewels = dict(Counter(totalJewels))
+
+        return totalJewels
+    
+    def jewelHandler(self):
+        
+        return

@@ -200,6 +200,6 @@ class wizardStats:
 
 def main():
     woop = wizardStats()
-    print(woop.getBaseStats("Storm", 180))
+    #print(woop.getBaseStats("Storm", 180))
     #print(woop.getCaps("Storm", 180))
-main()
+#main()

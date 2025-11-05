@@ -120,13 +120,16 @@ class Gear:
         
         attributes['Extra Flags'] = database.translate_flags(database.ExtraFlags(row[7])) #6
         attributes['School'] = database.translate_equip_school(row[8]) #7
-        attributes['Level'] = row[9] #8
 
-        attributes['Max Spells'] = row[11] #9
-        attributes['Max Copies'] = row[12] #10
-        attributes['Max School Copies'] = row[13] #11
-        attributes['Deck School'] = database.translate_equip_school(row[14]) #12
-        attributes['Max Treasure Cards'] = row[15] #13
+        attributes['Weave'] = database.translate_equip_school(row[9])
+
+        attributes['Level'] = row[10] #8
+
+        attributes['Max Spells'] = row[12] #9
+        attributes['Max Copies'] = row[13] #10
+        attributes['Max School Copies'] = row[14] #11
+        attributes['Deck School'] = database.translate_equip_school(row[15]) #12
+        attributes['Max Treasure Cards'] = row[16] #13
 
         # removes obvious mob decks
         if attributes['Max Copies'] > 64 or attributes['Max School Copies'] > 10 or attributes['Max Treasure Cards'] > 64:
@@ -177,7 +180,7 @@ class Gear:
                     attributes["Maycasts"].append(card_name)
 
             #If item has no stats, no cards, no set bonus, not a deck and no jewel slots, it is redundant
-        if (len(attributes) <= 15 and attributes['Set'] is None and attributes['Kind'] != "Deck" and 
+        if (len(attributes) <= 16 and attributes['Set'] is None and attributes['Kind'] != "Deck" and 
         attributes['Jewels'] == [] and attributes['Cards'] == [] and attributes ['Maycasts'] == []):
             return {}
         else:
@@ -190,8 +193,9 @@ class Gear:
     def generateGear(self):
 
         start = time.time()
-        cursor = self.db.execute("SELECT id FROM items where items.kind != 256")
-        #cursor = self.db.execute("SELECT id FROM items")
+        # Jewel exclusion query
+        #cursor = self.db.execute("SELECT id FROM items where items.kind != 256")
+        cursor = self.db.execute("SELECT id FROM items")
         allIDs = cursor.fetchall()
         self.id_list = []
         for i in allIDs:
@@ -211,14 +215,14 @@ class Gear:
         table['Extra Flags'] = table['Extra Flags'].fillna('None')
         table.fillna(0,inplace=True)
 
-        for stat in self.universalstats:
-            for school in self.schoolList:
-                columntitle= school + " " +stat
-                if columntitle in table.columns:
-                    table[columntitle]+=table[stat]
+        #for stat in self.universalstats:
+        #    for school in self.schoolList:
+        #        columntitle= school + " " +stat
+        #        if columntitle in table.columns:
+        #            table[columntitle]+=table[stat]
 
-        table.to_pickle(os.path.join(DATABASE_ROOT, 'allthegear.pkl'))
-        table.to_csv(os.path.join(DATABASE_ROOT, 'allthegear.csv'), index=False)
+        table.to_pickle(os.path.join(DATAFRAME_ROOT, 'allthegear.pkl'))
+        table.to_csv(os.path.join(DATAFRAME_ROOT, 'allthegear.csv'), index=False)
 
         end = time.time()
         print(end-start)
@@ -277,14 +281,14 @@ class Gear:
         table.fillna(0,inplace=True)
         #table = table[table.astype(str)['Cards'] != '[]']
 
-        for stat in self.universalstats:
-            for school in self.schoolList:
-                columntitle= school + " " +stat
-                if columntitle in table.columns:
-                    table[columntitle]+=table[stat]
+        #for stat in self.universalstats:
+        #    for school in self.schoolList:
+        #        columntitle= school + " " +stat
+        #        if columntitle in table.columns:
+        #            table[columntitle]+=table[stat]
 
-        table.to_pickle(os.path.join(DATABASE_ROOT, 'allthesets.pkl'))
-        table.to_csv(os.path.join(DATABASE_ROOT, 'allthesets.csv'),index=False)
+        table.to_pickle(os.path.join(DATAFRAME_ROOT, 'allthesets.pkl'))
+        table.to_csv(os.path.join(DATAFRAME_ROOT, 'allthesets.csv'),index=False)
 
         end = time.time()
         print(end-start)
