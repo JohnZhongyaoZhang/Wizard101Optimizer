@@ -306,14 +306,14 @@ def main():
     #print(TheOptimizer.gearTable[(TheOptimizer.gearTable['Kind'] == "Weapon") & (TheOptimizer.gearTable['School'] == "Storm") & (TheOptimizer.gearTable['Level'] == 180)])
     
     gearSet = ['Drop-DM-Hats-L180-SS-003-01',
-                   'Drop-DM-Robe-L180-SS-003-01',
-                   'Drop-DM-Shoes-L180-SS-003-01',
-                   'Drop-DM-Amulet-L180-SS-003-01',
-                   'Drop-DM-Wands-L180-SS-003-01',
-                   'Drop-DM-Athames-L180-SS-003-01',
-                   'Drop-DM-Rings-L180-SS-003-01',
-                   'Drop-DM-Deck-L180-SS-003-01',
-                   'Mount-ClockworkSteed-Dyeable-001']
+                'Drop-DM-Robe-L180-SS-003-01',
+                'Drop-DM-Shoes-L180-SS-003-01',
+                'Drop-DM-Amulet-L180-SS-003-01',
+                'Drop-DM-Wands-L180-SS-003-01',
+                'Drop-DM-Athames-L180-SS-003-01',
+                'Drop-DM-Rings-L180-SS-003-01',
+                'Drop-DM-Deck-L180-SS-003-01',
+                'Mount-ClockworkSteed-Dyeable-001']
     
     #print(TheOptimizer.gearTable[TheOptimizer.gearTable['Name'] == "Mount-ClockworkSteed-Dyeable-001"])
     #print(TheOptimizer.gearTable[TheOptimizer.gearTable['Kind'] == "Mount-ClockworkSteed-Dyeable-001"])

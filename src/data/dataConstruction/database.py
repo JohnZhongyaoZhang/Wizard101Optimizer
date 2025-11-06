@@ -116,22 +116,29 @@ class ItemKind(IntFlag):
 
 
 class ExtraFlags(IntFlag):
-    PET_JEWEL = 1 << 0
-    NO_AUCTION = 1 << 1
-    CROWNS_ONLY = 1 << 2
-    NO_GIFT = 1 << 3
-    INSTANT_EFFECT = 1 << 4
-    NO_COMBAT = 1 << 5
-    NO_DROPS = 1 << 6
-    NO_DYE = 1 << 7
-    NO_HATCHMAKING = 1 << 8
-    NO_PVP = 1 << 9
-    NO_SELL = 1 << 10
-    NO_SHATTER = 1 << 11
-    NO_TRADE = 1 << 12
-    PVP_ONLY = 1 << 13
-    ARENA_POINTS_ONLY = 1 << 14
-    BLUE_ARENA_POINTS_ONLY = 1 << 15
+    SQUARE_JEWEL = 1 << 0
+    CIRCLE_JEWEL = 1 << 1
+    PET_JEWEL = 1 << 2
+    TRIANGLE_JEWEL = 1 << 3
+    TEAR_JEWEL = 1 << 4
+    PIN_SQUARE_SHIELD = 1 << 5
+    PIN_SQUARE_SWORD = 1 << 6
+    PIN_SQUARE_PIP = 1 << 7
+    NO_AUCTION = 1 << 8
+    CROWNS_ONLY = 1 << 9
+    NO_GIFT = 1 << 10
+    INSTANT_EFFECT = 1 << 11
+    NO_COMBAT = 1 << 12
+    NO_DROPS = 1 << 13
+    NO_DYE = 1 << 14
+    NO_HATCHMAKING = 1 << 15
+    NO_PVP = 1 << 16
+    NO_SELL = 1 << 17
+    NO_SHATTER = 1 << 18
+    NO_TRADE = 1 << 19
+    PVP_ONLY = 1 << 20
+    ARENA_POINTS_ONLY = 1 << 21
+    BLUE_ARENA_POINTS_ONLY = 1 << 22
 
 
 @dataclass
@@ -177,6 +184,22 @@ def translate_flags(flag: int) -> List[str]:
         flags.append("Arena Points Only")
     if flag & ExtraFlags.BLUE_ARENA_POINTS_ONLY:
         flags.append("Blue Arena Points Only")
+    if flag & ExtraFlags.SQUARE_JEWEL:
+        flags.append("Square")
+    if flag & ExtraFlags.CIRCLE_JEWEL:
+        flags.append("Circle")
+    if flag & ExtraFlags.PET_JEWEL:
+        flags.append("Star")
+    if flag & ExtraFlags.TRIANGLE_JEWEL:
+        flags.append("Triangle")
+    if flag & ExtraFlags.TEAR_JEWEL:
+        flags.append(f"Tear")
+    if flag & ExtraFlags.PIN_SQUARE_SHIELD:
+        flags.append("Shield")
+    if flag & ExtraFlags.PIN_SQUARE_SWORD:
+        flags.append("Sword")
+    if flag & ExtraFlags.PIN_SQUARE_PIP:
+        flags.append("Power")
 
     return flags
 

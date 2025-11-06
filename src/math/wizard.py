@@ -11,7 +11,7 @@ class Wizard:
         self.gear = gear
         self.jewels = None
         self.pet = None
-        self.stats = {}
+        self.stats = None
 
     def gearStatSummation(self):
         # get base stats
@@ -29,9 +29,8 @@ class Wizard:
         return self.stats
 
     def jewelSummation(self):
-        totalJewels = '|'.join(self.gear['Jewels'].astype(str)).split('|')
+        totalJewels = list(filter(None, '|'.join(self.gear['Jewels'].astype(str)).split('|')))
         totalJewels = dict(Counter(totalJewels))
-
         return totalJewels
     
     def jewelHandler(self):

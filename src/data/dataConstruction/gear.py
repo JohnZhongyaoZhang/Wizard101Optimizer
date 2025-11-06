@@ -68,6 +68,9 @@ ORDER BY set_bonuses.id
 CLEANUPQUERIES = ["ALTER TABLE refinedcombination DROP COLUMN name", 
                   "ALTER TABLE refinedcombination RENAME COLUMN data to display"]
 
+
+JEWEL_TYPES = ["Circle", "Star", "Tear", "Square", "Shield", "Sword", "Power"]
+
 DATABASE_ROOT = os.path.join('src', 'data', 'databases')
 DATAFRAME_ROOT = os.path.join('src', 'data', 'dataframes')
 
@@ -126,7 +129,15 @@ class Gear:
         if attributes['Kind'] == "Mount" and " day)" in attributes['Display'].lower():
             return {}
         
-        attributes['Extra Flags'] = database.translate_flags(database.ExtraFlags(row[7])) #6
+        extraFlags = database.translate_flags(database.ExtraFlags(row[7]))
+        jewelType = next((jt for jt in JEWEL_TYPES if jt in extraFlags), None)
+        if jewelType:
+            extraFlags.remove(jewelType)
+
+        attributes['Jewel Type'] = jewelType
+
+        attributes['Extra Flags'] = extraFlags #6
+
         attributes['School'] = database.translate_equip_school(row[8]) #7
 
         attributes['Weave'] = database.translate_equip_school(row[9])
@@ -223,11 +234,11 @@ class Gear:
         table['Extra Flags'] = table['Extra Flags'].fillna('None')
         table.fillna(0,inplace=True)
 
-        #for stat in self.universalstats:
-        #    for school in self.schoolList:
-        #        columntitle= school + " " +stat
-        #        if columntitle in table.columns:
-        #            table[columntitle]+=table[stat]
+        # for stat in self.universalstats:
+        #     for school in self.schoolList:
+        #         columntitle= school + " " +stat
+        #         if columntitle in table.columns:
+        #             table[columntitle]+=table[stat]
 
         table.to_pickle(os.path.join(DATAFRAME_ROOT, 'allthegear.pkl'))
         table.to_csv(os.path.join(DATAFRAME_ROOT, 'allthegear.csv'), index=False)

@@ -1,4 +1,5 @@
 import numpy as np
+from wizard import Wizard
 
 class WizMath:
     def __init__(self, mode='Premiere League'):
@@ -126,15 +127,12 @@ class WizMath:
 
     def shadDistribution(self, generatingRating, defendingRating):
         if self.mode not in ['Premiere League', 'Raid', 'PvE']:
-             raise ValueError("No shad in current mode.")
+             raise ValueError("No shad in current mode.")  
+
+    def punchout(self, wizard1: Wizard, wizard2: Wizard, utility=False):
         
-        
-
-
-
-
-
-    def punchout(self, wizard1, wizard2, utility=False):
+        wizard1value = wizard1.stats["Health"]  * (wizard1.stats[wizard1.school + " Damage"]/100.0 + 1) * self.effectivecrit(wizard1.crit, wizard2.block) * (1 - max(0, wizard2.resist/100.0 - wizard1.pierce/100.0)) * wizard1.dpp
+        wizard2value = wizard2.health * (wizard2.stats[wizard2.school + " Damage"]/100.0 + 1) * self.effectivecrit(wizard2.crit, wizard1.block) *(1 - max(0, wizard1.resist/100.0 - wizard2.pierce/100.0)) * wizard2.dpp
         return 
     
 def main():
