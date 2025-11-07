@@ -2,6 +2,7 @@ import pandas as pd
 
 from src.data.dataConstruction.gear import Gear
 from src.data.dataConstruction.mobs import Mobs
+from src.data.dataConstruction.pets import Pets
 
 from src.math.wizard import Wizard
 from src.math.wizmath import WizMath
@@ -14,9 +15,9 @@ class Optimizer:
     def __init__(self):
         self.level = 180
         self.levellowerbound = 0
-        self.school = "Universal"
+        self.school = "Balance"
         self.weave = "Universal"
-        self.target = "PvP"
+        self.target = "Fire Resist"
         #self.spells = []
 
         self.deckaDeckAllowed = False
@@ -35,6 +36,7 @@ class Optimizer:
     def generateTables(self):
         GeneratorClass = Gear()
         MobClass = Mobs()
+        PetClass = Pets()
         if os.path.exists(os.path.join(DATAFRAME_ROOT, 'allthegear.pkl')):
             self.gearTable = pd.read_pickle(os.path.join(DATAFRAME_ROOT, 'allthegear.pkl'))
         else:
@@ -53,6 +55,12 @@ class Optimizer:
             print("Mob table not found, creating mob table")
             self.mobTable = MobClass.generateMobs()
             
+        if os.path.exists(os.path.join(DATAFRAME_ROOT, 'allthepets.pkl')):
+            self.petTable = pd.read_pickle(os.path.join(DATAFRAME_ROOT, 'allthepets.pkl'))
+        else:
+            print("Pet table not found, creating mob table")
+            self.petTable = PetClass.generatePets()
+
         #tables = self.restrictTableToInputtedParameters()
         #self.gearTable = tables[0]
         #self.setTable = tables[1]
@@ -300,7 +308,7 @@ def main():
     #TheOptimizer.gearTable = TheOptimizer.getTopTierPieces()
 
     #TheOptimizer.gearTable = TheOptimizer.removeSuboptimalItems2()
-    #TheOptimizer.maximizeOneStat()
+    TheOptimizer.maximizeOneStat()
     
     #TheOptimizer.combinationChecker()
 
@@ -316,30 +324,41 @@ def main():
                 'Drop-DM-Deck-L180-SS-003-01',
                 'Mount-ClockworkSteed-Dyeable-001']
     
-    iceAbominable = ['Drop-DM-Hats-L180-IS-003-01',
-                'Drop-DM-Robe-L180-IS-003-01',
-                'Drop-DM-Shoes-L180-IS-003-01',
-                'Drop-DM-Amulet-L180-IS-003-01',
-                'Drop-DM-Wands-L180-IS-003-01',
-                'Drop-DM-Athames-L180-IS-003-01',
-                'Drop-DM-Rings-L180-IS-003-01',
-                'Drop-DM-Deck-L180-IS-003-01',
+    fireAbominable = ['Drop-DM-Hats-L180-FS-003-01',
+                'Drop-DM-Robe-L180-FS-003-01',
+                'Drop-DM-Shoes-L180-FS-003-01',
+                'Drop-DM-Amulet-L180-FS-003-01',
+                'Drop-DM-Wands-L180-FS-003-01',
+                'Drop-DM-Athames-L180-FS-003-01',
+                'Drop-DM-Rings-L180-FS-003-01',
+                'Drop-DM-Deck-L180-FS-003-01',
                 'Mount-ClockworkSteed-Dyeable-001']
     
     #print(TheOptimizer.gearTable[TheOptimizer.gearTable['Name'] == "Mount-ClockworkSteed-Dyeable-001"])
     #print(TheOptimizer.gearTable[TheOptimizer.gearTable['Kind'] == "Mount-ClockworkSteed-Dyeable-001"])
 
     stormGear = TheOptimizer.gearTable[TheOptimizer.gearTable["Name"].isin(stormAbominable)].copy()
-    lifeGear = TheOptimizer.gearTable[TheOptimizer.gearTable["Name"].isin(iceAbominable)].copy()
-    print(lifeGear)
-    stormWizard = Wizard(school="Storm",level=180,gear=stormGear)
-    lifeWizard = Wizard(school="Ice",level=180,gear=lifeGear)
-    #jewels = stormWizard.jewelSummation()
-    #print(stormWizard.stats)
-    print(lifeWizard.stats)
-    #print(jewels)
+    lifeGear = TheOptimizer.gearTable[TheOptimizer.gearTable["Name"].isin(fireAbominable)].copy()
+    stormWizard = Wizard(school="Storm",weave="Fire",level=180,gear=stormGear)
+    fireWizard = Wizard(school="Fire",weave="Storm",level=180,gear=lifeGear)
+    stormJewels = {"Circle": ["Storm Pierce", "Fire Pierce"],
+                   "Square": ["Health"],
+                   "Sword": ["Fire Pierce", "Fire Damage"],
+                   "Shield": ["Outgoing Healing"],
+                   "Power": ["Fire Accuracy"]}
+    fireJewels = {"Circle": ["Fire Pierce", "Storm Pierce"],
+                   "Square": ["Health"],
+                   "Sword": ["Storm Pierce", "Storm Damage"],
+                   "Shield": ["Outgoing Healing"],
+                   "Power": ["Storm Accuracy"]}
+    stormWizard.addAllStats(stormJewels)
+    fireWizard.addAllStats(fireJewels)
+
+    print(stormWizard.getStats(['Storm Damage', 'Storm Pierce', 'Storm Crit Rating', 'Resist', 'Block Rating', 'Health']))
+    print(fireWizard.getStats(['Fire Damage', 'Fire Pierce', 'Fire Crit Rating', 'Resist', 'Block Rating', 'Health']))
+
     calculator = WizMath()
-    print(calculator.punchout(stormWizard, lifeWizard))
+    print(calculator.punchout(stormWizard, fireWizard))
     quit()
 
 main()

@@ -1,9 +1,6 @@
 import time
 from typing import List, Optional, Literal
-from operator import itemgetter
 import sqlite3
-
-from loguru import logger
 
 import src.data.dataConstruction.database as database
 
@@ -85,10 +82,6 @@ class Gear:
         self.setBonusBlacklist = ['Display Name']
         self.universalstats= ['Damage','Accuracy','Pierce','Resist','Crit Rating','Block Rating', 'Pip Conversion Rating']
 
-    def changeDB(self,db):
-        self.db.close()
-        self.db = sqlite3.connect(db)
-
     def fetch_item(self, name: str) -> List[tuple]:
         cursor = self.db.execute(FIND_ITEM_QUERY, (name,)) 
         return cursor.fetchall()
@@ -100,7 +93,7 @@ class Gear:
             cursor = self.db.execute(SET_BONUS_NAME_QUERY, (set_id,)) 
             return (cursor.fetchone())[0]
     
-    def fetch_item_attributes(self, item: int) -> List[str]:
+    def fetch_item_attributes(self, item: int):
         attributes = {}
         
         row = self.db.execute("SELECT * FROM items WHERE id == ?", (item,)).fetchone()

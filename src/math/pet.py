@@ -1,3 +1,4 @@
-class Pet:
+
+class PetCreator:
     def __init__(self):
         

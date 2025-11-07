@@ -1,5 +1,4 @@
 from typing import List, Optional, Literal
-from operator import itemgetter
 import sqlite3
 import time
 
@@ -51,7 +50,7 @@ class Mobs:
                     existing_stats[stat] = itemStats[stat]
         return existing_stats
 
-    def fetch_mob_item_attributes(self, item: int) -> List[str]:
+    def fetch_mob_item_attributes(self, item: int) :
         attributes = {}
         cursor = self.db.execute("SELECT * FROM item_stats WHERE item == ?", (item,)).fetchall()
         
@@ -75,14 +74,14 @@ class Mobs:
 
         return attributes
 
-    def fetch_mob_items(self, mob: int) -> List[str]:
+    def fetch_mob_items(self, mob: int) :
         items = []
         cursor = self.db.execute("SELECT * FROM mob_items WHERE mob == ?", (mob,))
         for row in cursor:
             items.append(row[2])
         return items
 
-    def fetch_mob_attributes(self, mob: int) -> List[str]:
+    def fetch_mob_attributes(self, mob: int):
         
         attributes = {}
         
