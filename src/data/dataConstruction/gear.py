@@ -234,11 +234,11 @@ class Gear:
         table['Extra Flags'] = table['Extra Flags'].fillna('None')
         table.fillna(0,inplace=True)
 
-        # for stat in self.universalstats:
-        #     for school in self.schoolList:
-        #         columntitle= school + " " +stat
-        #         if columntitle in table.columns:
-        #             table[columntitle]+=table[stat]
+        for stat in self.universalstats:
+            for school in self.schoolList:
+                columntitle= school + " " +stat
+                if columntitle in table.columns:
+                    table[columntitle]+=table[stat]
 
         table.to_pickle(os.path.join(DATAFRAME_ROOT, 'allthegear.pkl'))
         table.to_csv(os.path.join(DATAFRAME_ROOT, 'allthegear.csv'), index=False)
@@ -300,11 +300,11 @@ class Gear:
         table.fillna(0,inplace=True)
         #table = table[table.astype(str)['Cards'] != '[]']
 
-        #for stat in self.universalstats:
-        #    for school in self.schoolList:
-        #        columntitle= school + " " +stat
-        #        if columntitle in table.columns:
-        #            table[columntitle]+=table[stat]
+        for stat in self.universalstats:
+           for school in self.schoolList:
+               columntitle= school + " " +stat
+               if columntitle in table.columns:
+                   table[columntitle]+=table[stat]
 
         table.to_pickle(os.path.join(DATAFRAME_ROOT, 'allthesets.pkl'))
         table.to_csv(os.path.join(DATAFRAME_ROOT, 'allthesets.csv'),index=False)

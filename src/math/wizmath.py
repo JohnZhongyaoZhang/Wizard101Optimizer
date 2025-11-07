@@ -1,5 +1,8 @@
 import numpy as np
-from wizard import Wizard
+from src.math.wizard import Wizard
+
+schools = ['Fire', 'Ice', 'Storm', 'Myth', 'Life', 'Death', 'Balance']
+schoolDPPs = dict(zip(schools, [100,83,125,90,83,85,85]))
 
 class WizMath:
     def __init__(self, mode='Premiere League'):
@@ -130,11 +133,18 @@ class WizMath:
              raise ValueError("No shad in current mode.")  
 
     def punchout(self, wizard1: Wizard, wizard2: Wizard, utility=False):
-        
-        wizard1value = wizard1.stats["Health"]  * (wizard1.stats[wizard1.school + " Damage"]/100.0 + 1) * self.effectivecrit(wizard1.crit, wizard2.block) * (1 - max(0, wizard2.resist/100.0 - wizard1.pierce/100.0)) * wizard1.dpp
-        wizard2value = wizard2.health * (wizard2.stats[wizard2.school + " Damage"]/100.0 + 1) * self.effectivecrit(wizard2.crit, wizard1.block) *(1 - max(0, wizard1.resist/100.0 - wizard2.pierce/100.0)) * wizard2.dpp
-        return 
+        wizard1value = (wizard1.stats["Health"] *
+                        (wizard1.stats[wizard1.school + " Damage"]/100.0 + 1) *
+                        self.effectivecrit(wizard1.stats[wizard1.school + " Crit Rating"], wizard2.stats[wizard1.school + " Block Rating"]) *
+                        (1 - max(0, wizard2.stats[wizard1.school + " Resist"]/100.0 - wizard1.stats[wizard1.school + " Pierce"]/100.0)) *
+                        schoolDPPs[wizard1.school])
+        wizard2value = (wizard2.stats["Health"] *
+                        (wizard2.stats[wizard2.school + " Damage"]/100.0 + 1) *
+                        self.effectivecrit(wizard2.stats[wizard2.school + " Crit Rating"], wizard1.stats[wizard2.school + " Block Rating"]) *
+                        (1 - max(0, wizard1.stats[wizard2.school + " Resist"]/100.0 - wizard2.stats[wizard2.school + " Pierce"]/100.0)) *
+                        schoolDPPs[wizard2.school])
+        return wizard1value/wizard2value
     
 def main():
     testing = WizMath(mode='P')
-main()
+#main()

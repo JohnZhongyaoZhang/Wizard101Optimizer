@@ -4,6 +4,7 @@ from src.data.dataConstruction.gear import Gear
 from src.data.dataConstruction.mobs import Mobs
 
 from src.math.wizard import Wizard
+from src.math.wizmath import WizMath
 
 import os
 
@@ -13,7 +14,7 @@ class Optimizer:
     def __init__(self):
         self.level = 180
         self.levellowerbound = 0
-        self.school = "Storm"
+        self.school = "Universal"
         self.weave = "Universal"
         self.target = "PvP"
         #self.spells = []
@@ -52,9 +53,9 @@ class Optimizer:
             print("Mob table not found, creating mob table")
             self.mobTable = MobClass.generateMobs()
             
-        tables = self.restrictTableToInputtedParameters()
-        self.gearTable = tables[0]
-        self.setTable = tables[1]
+        #tables = self.restrictTableToInputtedParameters()
+        #self.gearTable = tables[0]
+        #self.setTable = tables[1]
 
         missingColumns = self.gearTable.columns.difference(self.setTable.columns)
 
@@ -287,7 +288,7 @@ class Optimizer:
             print(f"Number of {self.kindsconsidered[i]}: {len(itemsByKind[i])}")
             total*=max(len(itemsByKind[i]),1)
         print(f"Number of combinations: {total}")
-        
+
 def main():
     TheOptimizer = Optimizer()
     #TheOptimizer.maximizeOneStat()
@@ -305,7 +306,7 @@ def main():
 
     #print(TheOptimizer.gearTable[(TheOptimizer.gearTable['Kind'] == "Weapon") & (TheOptimizer.gearTable['School'] == "Storm") & (TheOptimizer.gearTable['Level'] == 180)])
     
-    gearSet = ['Drop-DM-Hats-L180-SS-003-01',
+    stormAbominable = ['Drop-DM-Hats-L180-SS-003-01',
                 'Drop-DM-Robe-L180-SS-003-01',
                 'Drop-DM-Shoes-L180-SS-003-01',
                 'Drop-DM-Amulet-L180-SS-003-01',
@@ -315,16 +316,30 @@ def main():
                 'Drop-DM-Deck-L180-SS-003-01',
                 'Mount-ClockworkSteed-Dyeable-001']
     
+    iceAbominable = ['Drop-DM-Hats-L180-IS-003-01',
+                'Drop-DM-Robe-L180-IS-003-01',
+                'Drop-DM-Shoes-L180-IS-003-01',
+                'Drop-DM-Amulet-L180-IS-003-01',
+                'Drop-DM-Wands-L180-IS-003-01',
+                'Drop-DM-Athames-L180-IS-003-01',
+                'Drop-DM-Rings-L180-IS-003-01',
+                'Drop-DM-Deck-L180-IS-003-01',
+                'Mount-ClockworkSteed-Dyeable-001']
+    
     #print(TheOptimizer.gearTable[TheOptimizer.gearTable['Name'] == "Mount-ClockworkSteed-Dyeable-001"])
     #print(TheOptimizer.gearTable[TheOptimizer.gearTable['Kind'] == "Mount-ClockworkSteed-Dyeable-001"])
 
-    stormGear = TheOptimizer.gearTable[TheOptimizer.gearTable["Name"].isin(gearSet)].copy()
-    print(stormGear)
+    stormGear = TheOptimizer.gearTable[TheOptimizer.gearTable["Name"].isin(stormAbominable)].copy()
+    lifeGear = TheOptimizer.gearTable[TheOptimizer.gearTable["Name"].isin(iceAbominable)].copy()
+    print(lifeGear)
     stormWizard = Wizard(school="Storm",level=180,gear=stormGear)
-    summedStats = stormWizard.gearStatSummation()
-    jewels = stormWizard.jewelSummation()
-    print(summedStats)
-    print(jewels)
+    lifeWizard = Wizard(school="Ice",level=180,gear=lifeGear)
+    #jewels = stormWizard.jewelSummation()
+    #print(stormWizard.stats)
+    print(lifeWizard.stats)
+    #print(jewels)
+    calculator = WizMath()
+    print(calculator.punchout(stormWizard, lifeWizard))
     quit()
 
 main()
