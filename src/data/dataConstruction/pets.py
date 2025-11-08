@@ -127,6 +127,10 @@ class Pets:
         if attributes['Name'] == "Corgi":
             attributes['Energy'] = 8
 
+        # Remove truly redundant pets
+        if attributes['Set'] == None and attributes['Cards'] == '' and attributes['Name'] not in ['SkeletonArmored', 'Corgi']:
+            return {}
+
         return attributes
     
     def generatePets(self):

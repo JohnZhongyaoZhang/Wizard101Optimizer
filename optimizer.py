@@ -58,7 +58,7 @@ class Optimizer:
         if os.path.exists(os.path.join(DATAFRAME_ROOT, 'allthepets.pkl')):
             self.petTable = pd.read_pickle(os.path.join(DATAFRAME_ROOT, 'allthepets.pkl'))
         else:
-            print("Pet table not found, creating mob table")
+            print("Pet table not found, creating pet table")
             self.petTable = PetClass.generatePets()
 
         #tables = self.restrictTableToInputtedParameters()

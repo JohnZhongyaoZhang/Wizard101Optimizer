@@ -67,7 +67,6 @@ CLEANUPQUERIES = ["ALTER TABLE refinedcombination DROP COLUMN name",
 
 
 JEWEL_TYPES = ["Circle", "Star", "Tear", "Square", "Shield", "Sword", "Power"]
-
 DATABASE_ROOT = os.path.join('src', 'data', 'databases')
 DATAFRAME_ROOT = os.path.join('src', 'data', 'dataframes')
 
@@ -123,7 +122,7 @@ class Gear:
             return {}
         
         extraFlags = database.translate_flags(database.ExtraFlags(row[7]))
-        jewelType = next((jt for jt in JEWEL_TYPES if jt in extraFlags), None)
+        jewelType = next((jewelType for jewelType in JEWEL_TYPES if jewelType in extraFlags), None)
         if jewelType:
             extraFlags.remove(jewelType)
 
