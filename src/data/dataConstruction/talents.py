@@ -27,7 +27,7 @@ class Talents:
                              willCoefficient=0,
                              powerCoefficient=0):
         
-        newTalentFrame = pd.DataFrame(columns=self.combatTalentFrame.columns)
+        newTalentFrame = pd.DataFrame()
         if allschools:
             prefixes = SCHOOLS.copy()
             schoolsused = SCHOOLS.copy()
@@ -103,8 +103,13 @@ class Talents:
         self.genericTalentCreator(name='Defender',stat='Block Rating',allschools=False,hyphenated=False,generalCoefficient=24/1000,intellectCoefficient=2,willCoefficient=2,powerCoefficient=1)
         self.genericTalentCreator(name='Blocker',stat='Block Rating',allschools=False,hyphenated=False,generalCoefficient=18/1000,intellectCoefficient=2,willCoefficient=2,powerCoefficient=1)
 
-        # Pip Talents
+        # Pip Conserve Talents
         self.genericTalentCreator(name='Conserver',stat='Pip Conversion Rating',allschools=False,hyphenated=False,generalCoefficient=24/1000,agilityCoefficient=2,willCoefficient=2,powerCoefficient=1)
+        self.genericTalentCreator(name='Saver',stat='Pip Conversion Rating',allschools=False,hyphenated=False,generalCoefficient=18/1000,agilityCoefficient=2,willCoefficient=2,powerCoefficient=1)
+
+        # Power Pip Chance Talents
+        self.genericTalentCreator(name='O\'Plenty',stat='Power Pip Chance',allschools=False,hyphenated=False,generalCoefficient=1/250,strengthCoefficient=2,intellectCoefficient=2,powerCoefficient=1)
+        self.genericTalentCreator(name='Boost',stat='Power Pip Chance',allschools=False,hyphenated=False,constantValueOverride=5)
 
 def main():
     talentGenerator = Talents()
