@@ -69,6 +69,7 @@ class Wizard:
             self.gearTable = pd.read_pickle(os.path.join(DATAFRAME_ROOT, 'allthegear.pkl'))
         else:
             print("Gear table not found, use optimizer.py to generate gear table")
+            quit()
 
         # Only appropriate level jewels available for the weave combo allowed
         masterystring = f"All schools except {self.school}"
