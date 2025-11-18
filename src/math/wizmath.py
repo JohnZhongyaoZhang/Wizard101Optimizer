@@ -12,22 +12,22 @@ class WizMath:
         self.mode = mode
         match self.mode:
             case "PvE":
-                self.dk0, self.dn0, self.dL = 237, 0, 247
-                self.rk0, self.rn0, self.rL = 120, -20, 125
-                self.thresholdFactor = 1.5
-                self.ratingFactor = 0
+                self.dk0, self.dn0, self.dL = 275, 0, 276
+                self.rk0, self.rn0, self.rL = 120, 0, 125
+                self.thresholdFactor = 3.8
+                self.ratingFactor = .5
                 self.crit = "PvE"
                 self.incoming = True
             case "Premiere League":
-                self.dk0, self.dn0, self.dL = 207, 0, 212
-                self.rk0, self.rn0, self.rL = 94, 0, 99
+                self.dk0, self.dn0, self.dL = 221, 0, 226
+                self.rk0, self.rn0, self.rL = 64, 0, 69
                 self.thresholdFactor = 5
                 self.ratingFactor = .75
                 self.crit = "PvP"
                 self.incoming = False
             case "Raid":
-                self.dk0, self.dn0, self.dL = 120, 20, 250
-                self.rk0, self.rn0, self.rL = 65, -20, 70
+                self.dk0, self.dn0, self.dL = 501, 0, 500
+                self.rk0, self.rn0, self.rL = 94, 0, 99
                 self.thresholdFactor = 5
                 self.ratingFactor = .75
                 self.crit = "PvP"
