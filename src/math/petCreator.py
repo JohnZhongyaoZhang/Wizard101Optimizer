@@ -5,8 +5,20 @@ DATAFRAME_ROOT = os.path.join('src', 'data', 'dataframes')
 UNIVERSAL_STATS = ['Damage','Accuracy','Pierce','Resist','Crit Rating','Block Rating', 'Pip Conversion Rating']
 SCHOOLS = ['Fire', 'Ice', 'Storm', 'Balance', 'Life', 'Myth', 'Death']
 
-class PetCreator:
-    def __init__(self, talents, strength=255,intellect=250,agility=260,will=260,power=250):
+if os.path.exists(os.path.join(DATAFRAME_ROOT, 'selfishtalents.pkl')):
+    SELFISH_TALENTS = pd.read_pickle(os.path.join(DATAFRAME_ROOT, 'selfishtalents.pkl'))
+else:
+    print("Selfish talent table not found.")
+    quit()
+
+if os.path.exists(os.path.join(DATAFRAME_ROOT, 'combattalents.pkl')):
+    COMBAT_TALENTS = pd.read_pickle(os.path.join(DATAFRAME_ROOT, 'combattalents.pkl'))
+else:
+    print("Combat talent table not found.")
+    quit()
+
+class Pet:
+    def __init__(self, body="Generic", talents=[], strength=255,intellect=250,agility=260,will=260,power=250):
         self.petStats = pd.Series(data={"Strength": strength,
                       "Intellect": intellect,
                       "Agility": agility,
@@ -14,21 +26,12 @@ class PetCreator:
                       "Power": power})
         self.talents = talents
         self.stats = pd.Series()
-        self.generateTables()
+        # TBI
+        self.body = body
+        self.cards = []
+        self.selfishTalents = SELFISH_TALENTS
+        self.combatTalents = COMBAT_TALENTS
         self.processTalents()
-    
-    def generateTables(self):
-        if os.path.exists(os.path.join(DATAFRAME_ROOT, 'selfishtalents.pkl')):
-            self.selfishTalents = pd.read_pickle(os.path.join(DATAFRAME_ROOT, 'selfishtalents.pkl'))
-        else:
-            print("Selfish talent table not found.")
-            quit()
-
-        if os.path.exists(os.path.join(DATAFRAME_ROOT, 'combattalents.pkl')):
-            self.combatTalents = pd.read_pickle(os.path.join(DATAFRAME_ROOT, 'combattalents.pkl'))
-        else:
-            print("Combat talent table not found.")
-            quit()
     
     def processTalents(self):
         selfishTalents = self.selfishTalents[self.selfishTalents["Name"].isin(self.talents)].copy()
@@ -58,7 +61,7 @@ class PetCreator:
         self.stats = self.stats.add(expanded, fill_value=0)
 
 def main():
-    tester = PetCreator(talents=['Mighty', 'Fire-Dealer', 'Spell-Proof', 'Fire-Giver', 'Spell-Defying', 'Pain-Giver'])
+    tester = Pet(talents=['Mighty', 'Fire-Dealer', 'Spell-Proof', 'Fire-Giver', 'Spell-Defying', 'Pain-Giver'])
     print(tester.stats)
 
-main()
+#main()

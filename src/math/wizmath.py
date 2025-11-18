@@ -96,7 +96,7 @@ class WizMath:
             case "None":
                  return 1
     
-    def critchance(self,criticalRating,blockRating,casterlevel=170):
+    def critchance(self,criticalRating,blockRating,casterlevel=180):
         if criticalRating == 0 and blockRating == 0:
             return 0
         match self.crit:
@@ -107,7 +107,7 @@ class WizMath:
             case "None":
                 return 0
     
-    def blockchance(self,criticalRating,blockRating,receiverlevel=170):
+    def blockchance(self,criticalRating,blockRating,receiverlevel=180):
         if criticalRating == 0 and blockRating == 0:
             return 0
         match self.crit:
@@ -119,13 +119,13 @@ class WizMath:
             case "None":
                 return 0
     
-    def effectivecrit(self,criticalRating,blockRating,casterlevel=170,receiverlevel=170):
+    def effectivecrit(self,criticalRating,blockRating,casterlevel=180,receiverlevel=180):
         if self.crit == "None":
             return 1
         effectivecritchance = self.critchance(criticalRating,blockRating,casterlevel) * (1-self.blockchance(criticalRating,blockRating,receiverlevel))
         return 1 + effectivecritchance * (self.critdamage(criticalRating,blockRating)-1)
     
-    def effectiveMultipllier(self,criticalRating,blockRating, damageRating, resistRating, pierceRating, casterlevel=170,receiverlevel=170):
+    def effectiveMultipllier(self,criticalRating,blockRating, damageRating, resistRating, pierceRating, casterlevel=180,receiverlevel=180):
         return self.effectivecrit(criticalRating,blockRating,casterlevel,receiverlevel) * self.damageMultiplier(damageRating) * self.resistAfterPierceMultiplier(resistRating,pierceRating)
 
     def shadDistribution(self, generatingRating, defendingRating):

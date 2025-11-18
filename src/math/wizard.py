@@ -1,4 +1,5 @@
 from src.math.statCaps import wizardStats
+from src.math.petCreator import Pet
 
 from collections import Counter
 
@@ -8,21 +9,30 @@ import os
 DATAFRAME_ROOT = os.path.join('src', 'data', 'dataframes')
 JEWEL_TYPES = ["Circle", "Star", "Tear", "Square", "Shield", "Sword", "Power"]
 
+if os.path.exists(os.path.join(DATAFRAME_ROOT, 'allthegear.pkl')):
+    GEAR_TABLE = pd.read_pickle(os.path.join(DATAFRAME_ROOT, 'allthegear.pkl'))
+else:
+    print("Gear table not found, use optimizer.py to generate gear table")
+    quit()
+
+WIZARD_STATS = wizardStats()
+
 class Wizard:
     def __init__(self, school: str, level: int, gear: pd.DataFrame, weave: str | None = "Universal"):
-        self.wizardStats = wizardStats()
         self.school = school
         self.weave = weave
         self.level = level
         self.gear = gear
         self.jewels = None
         self.pet = None
+        self.gearTable = GEAR_TABLE
         self.stats = pd.Series()
 
-    def addAllStats(self, statPerJewelType: dict):
+    def addAllStats(self, statPerJewelType: dict, pet: Pet):
         self.addBaseStats()
         self.addGearStats()
         self.addJewelStats(statPerJewelType)
+        self.addPetStats(pet)
         self.addSetBonusStats()
 
     def getStats(self, statFilter=None):
@@ -34,7 +44,7 @@ class Wizard:
             return self.stats
 
     def addBaseStats(self):
-        baseStats = self.wizardStats.getBaseStats(school=self.school,level=self.level).select_dtypes(include="number").squeeze()
+        baseStats = WIZARD_STATS.getBaseStats(school=self.school,level=self.level).select_dtypes(include="number").squeeze()
         self.stats = self.stats.add(baseStats, fill_value=0)
 
     def addGearStats(self):
@@ -59,18 +69,16 @@ class Wizard:
     def addSetBonusStats(self):
         return
     
+    def addPetStats(self, pet: Pet):
+        self.pet = pet
+        self.stats = self.stats.add(pet.stats, fill_value=0)
+
     def jewelSummation(self):
         totalJewels = list(filter(None, '|'.join(self.gear['Jewels'].astype(str)).split('|')))
         totalJewels = dict(Counter(totalJewels))
         return totalJewels
     
     def generateTables(self):
-        if os.path.exists(os.path.join(DATAFRAME_ROOT, 'allthegear.pkl')):
-            self.gearTable = pd.read_pickle(os.path.join(DATAFRAME_ROOT, 'allthegear.pkl'))
-        else:
-            print("Gear table not found, use optimizer.py to generate gear table")
-            quit()
-
         # Only appropriate level jewels available for the weave combo allowed
         masterystring = f"All schools except {self.school}"
         self.gearTable = self.gearTable[~(self.gearTable["School"] == masterystring)]

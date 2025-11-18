@@ -3,6 +3,7 @@ import pandas as pd
 from src.data.dataConstruction.gear import Gear
 from src.data.dataConstruction.mobs import Mobs
 from src.data.dataConstruction.pets import Pets
+from src.math.petCreator import Pet
 
 from src.math.wizard import Wizard
 from src.math.wizmath import WizMath
@@ -66,9 +67,6 @@ class Optimizer:
         #self.setTable = tables[1]
 
         missingColumns = self.gearTable.columns.difference(self.setTable.columns)
-
-        #for col in missingColumns:
-        #    self.setTable[col] = 0
 
         self.setTable = pd.concat(
         [self.setTable, pd.DataFrame(0, index=self.setTable.index, columns=missingColumns)],
@@ -308,13 +306,16 @@ def main():
     #TheOptimizer.gearTable = TheOptimizer.getTopTierPieces()
 
     #TheOptimizer.gearTable = TheOptimizer.removeSuboptimalItems2()
-    TheOptimizer.maximizeOneStat()
+    #TheOptimizer.maximizeOneStat()
     
     #TheOptimizer.combinationChecker()
 
     #print(TheOptimizer.gearTable[(TheOptimizer.gearTable['Kind'] == "Weapon") & (TheOptimizer.gearTable['School'] == "Storm") & (TheOptimizer.gearTable['Level'] == 180)])
     
-    stormAbominable = ['Drop-DM-Hats-L180-SS-003-01',
+    wizard1School = "Storm"
+    wizard2School = "Myth"
+
+    wizard1Gear = ['Drop-DM-Hats-L180-SS-003-01',
                 'Drop-DM-Robe-L180-SS-003-01',
                 'Drop-DM-Shoes-L180-SS-003-01',
                 'Drop-DM-Amulet-L180-SS-003-01',
@@ -324,41 +325,40 @@ def main():
                 'Drop-DM-Deck-L180-SS-003-01',
                 'Mount-ClockworkSteed-Dyeable-001']
     
-    fireAbominable = ['Drop-DM-Hats-L180-FS-003-01',
-                'Drop-DM-Robe-L180-FS-003-01',
-                'Drop-DM-Shoes-L180-FS-003-01',
-                'Drop-DM-Amulet-L180-FS-003-01',
-                'Drop-DM-Wands-L180-FS-003-01',
-                'Drop-DM-Athames-L180-FS-003-01',
-                'Drop-DM-Rings-L180-FS-003-01',
-                'Drop-DM-Deck-L180-FS-003-01',
+    wizard2Gear = ['Drop-DM-Hats-L180-MS-003-01',
+                'Drop-DM-Robe-L180-MS-003-01',
+                'Drop-DM-Shoes-L180-MS-003-01',
+                'Drop-DM-Amulet-L180-MS-003-01',
+                'Drop-DM-Wands-L180-MS-003-01',
+                'Drop-DM-Athames-L180-MS-003-01',
+                'Drop-DM-Rings-L180-MS-003-01',
+                'Drop-DM-Deck-L180-MS-003-01',
                 'Mount-ClockworkSteed-Dyeable-001']
     
     #print(TheOptimizer.gearTable[TheOptimizer.gearTable['Name'] == "Mount-ClockworkSteed-Dyeable-001"])
     #print(TheOptimizer.gearTable[TheOptimizer.gearTable['Kind'] == "Mount-ClockworkSteed-Dyeable-001"])
 
-    stormGear = TheOptimizer.gearTable[TheOptimizer.gearTable["Name"].isin(stormAbominable)].copy()
-    lifeGear = TheOptimizer.gearTable[TheOptimizer.gearTable["Name"].isin(fireAbominable)].copy()
-    stormWizard = Wizard(school="Storm",weave="Fire",level=180,gear=stormGear)
-    fireWizard = Wizard(school="Fire",weave="Storm",level=180,gear=lifeGear)
-    stormJewels = {"Circle": ["Storm Pierce", "Fire Pierce"],
+    wizard1Gear = TheOptimizer.gearTable[TheOptimizer.gearTable["Name"].isin(wizard1Gear)].copy()
+    lifeGear = TheOptimizer.gearTable[TheOptimizer.gearTable["Name"].isin(wizard2Gear)].copy()
+    wizard1 = Wizard(school=wizard1School, level=180,gear=wizard1Gear)
+    wizard2 = Wizard(school=wizard2School, level=180,gear=lifeGear)
+    wizard1Jewels = {"Circle": [wizard1School+" Pierce"],
                    "Square": ["Health"],
-                   "Sword": ["Fire Pierce", "Fire Damage"],
                    "Shield": ["Outgoing Healing"],
                    "Power": ["Fire Accuracy"]}
-    fireJewels = {"Circle": ["Fire Pierce", "Storm Pierce"],
+    lifeJewels = {"Circle": [wizard2School+" Pierce"],
                    "Square": ["Health"],
-                   "Sword": ["Storm Pierce", "Storm Damage"],
                    "Shield": ["Outgoing Healing"],
-                   "Power": ["Storm Accuracy"]}
-    stormWizard.addAllStats(stormJewels)
-    fireWizard.addAllStats(fireJewels)
+                   }
+    
+    wizard1.addAllStats(wizard1Jewels, Pet(talents=['Mighty', wizard1School+'-Dealer', 'Spell-Proof', 'Armor Breaker', 'Spell-Defying', 'Pain-Giver']))
+    wizard2.addAllStats(lifeJewels, Pet(talents=['Mighty', wizard2School+'-Dealer', 'Spell-Proof', 'Armor Breaker', 'Spell-Defying', 'Pain-Giver']))
 
-    print(stormWizard.getStats(['Storm Damage', 'Storm Pierce', 'Storm Crit Rating', 'Resist', 'Block Rating', 'Health']))
-    print(fireWizard.getStats(['Fire Damage', 'Fire Pierce', 'Fire Crit Rating', 'Resist', 'Block Rating', 'Health']))
+    print(wizard1.getStats([wizard1School+' Damage', wizard1School+' Pierce', wizard1School+' Crit Rating', 'Resist', 'Block Rating', 'Health']))
+    print(wizard2.getStats([wizard2School+' Damage', wizard2School+' Pierce', wizard2School+' Crit Rating', 'Resist', 'Block Rating', 'Health']))
 
     calculator = WizMath()
-    print(calculator.punchout(stormWizard, fireWizard))
+    print(calculator.punchout(wizard1, wizard2))
     quit()
 
 main()

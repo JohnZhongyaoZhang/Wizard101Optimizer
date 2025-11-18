@@ -140,12 +140,7 @@ LEVEL_SCALED_DATA_TABLE = {
 
 FILE_ROOT = os.path.join("src", "math")
 
-class wizardStats:
-    def __init__(self):
-        self.statCaps = self.createCaps()
-        self.baseStats = self.createBaseStats()
-
-    def createCaps(self):
+def createCaps():
         tempData = []
         statCaps = json.load(open(os.path.join(FILE_ROOT, 'LevelScaledData.json')))['m_levelScaledInfoList']
 
@@ -161,8 +156,8 @@ class wizardStats:
             tempData.append(value)
         statCaps = pd.DataFrame(tempData).fillna(0)
         return statCaps
-    
-    def createBaseStats(self):
+
+def createBaseStats():
         baseStats = json.load(open(os.path.join(FILE_ROOT, 'MagicXPConfig.json')))
         del baseStats['m_encounterXPFactors'], baseStats['m_maxSchoolLevel'], baseStats['m_experienceBonus'], baseStats['m_schoolOfFocusBonus'], baseStats['m_levelsConfig']
         
@@ -191,6 +186,15 @@ class wizardStats:
                                                         f"{schoolName} Pip Conversion Rating": entry2[f"m_pipConversionRating{schoolName}"]} | universalStartingStats[level])
 
         return pd.DataFrame(schoolSpecificStartingStats).fillna(0)
+
+STAT_CAPS = createCaps()
+BASE_STATS = createBaseStats()
+
+
+class wizardStats:
+    def __init__(self):
+        self.statCaps = STAT_CAPS
+        self.baseStats = BASE_STATS
     
     def getBaseStats(self, school: str, level: int):
         return self.baseStats[(self.baseStats['School'] == school) & (self.baseStats['Level'] == level)]
@@ -200,6 +204,6 @@ class wizardStats:
 
 def main():
     woop = wizardStats()
-    #print(woop.getBaseStats("Storm", 180))
-    #print(woop.getCaps("Storm", 180))
-#main()
+    print(woop.getBaseStats("Storm", 180))
+    print(woop.getCaps("Storm", 180))
+main()
