@@ -16,9 +16,9 @@ class Optimizer:
     def __init__(self):
         self.level = 180
         self.levellowerbound = 0
-        self.school = "Balance"
+        self.school = "Life"
         self.weave = "Universal"
-        self.target = "Fire Resist"
+        self.target = "Life Damage"
         #self.spells = []
 
         self.deckaDeckAllowed = False

@@ -2,54 +2,49 @@ import random
 import math
 from collections import Counter
 import json
+import numpy as np
 
-ITERATIONS = 1000
+ITERATIONS = 100000
 RATINGLOWERBOUND = 45
-RATINGUPPERBOUND = 183
+RATINGUPPERBOUND = 187
 
 class shadMath:
     def createDistribution(self, generatingRating, defendingRating, thresholdFactor, ratingFactor):
         threshold = defendingRating * thresholdFactor
         minimumGeneration = generatingRating * ratingFactor
         maximumGeneration = generatingRating
+        maxRounds = int(math.ceil(threshold / minimumGeneration))
 
-        trialOutcomes = []
+        rolls = np.random.uniform(
+            minimumGeneration,
+            maximumGeneration,
+            size=(ITERATIONS, maxRounds)
+        )
 
-        # Simulate ingame generation
-        for i in range(ITERATIONS):
-            accumulatedShad = 0
-            rounds = 0
-            while (accumulatedShad < threshold):
-                accumulatedShad+=random.uniform(minimumGeneration, maximumGeneration)
-                rounds+=1
-            trialOutcomes.append(rounds)
-        
-        distribution = sorted(dict(Counter(trialOutcomes)).items())
+        cumulativeSum = np.cumsum(rolls, axis=1)
+        rounds = np.argmax(cumulativeSum >= threshold, axis=1) + 1
 
-        # Normalization
-        normalizedDistribution = {}
-        for round in distribution:
-            normalizedDistribution[round[0]] = round[1]/ITERATIONS
+        unique, counts = np.unique(rounds, return_counts=True)
+        dist = {int(k): float(v / ITERATIONS) for k, v in zip(unique, counts)}
+        dist["Average"] = float(rounds.mean())
 
-        normalizedDistribution['Average'] = sum(trialOutcomes) / len(trialOutcomes)
-
-        return normalizedDistribution
+        return dist
 
     def getRatingPairs(self):
-        ratios = []
-        ratingPairs = []
-        for i in range(RATINGLOWERBOUND, RATINGUPPERBOUND+1):
-            for j in range(RATINGLOWERBOUND, RATINGUPPERBOUND+1):
-                gcd = math.gcd(i, j)
+        ratios_seen = set()
+        pairs = []
+
+        for g in range(RATINGLOWERBOUND, RATINGUPPERBOUND + 1):
+            for d in range(RATINGLOWERBOUND, RATINGUPPERBOUND + 1):
+                gcd = math.gcd(g, d)
                 if gcd != 1:
-                    reduced = (i/gcd, j/gcd)
-                    if reduced not in ratios:
-                        ratingPairs.append((i, j))
-                        ratios.append(reduced)
-                else:
-                    ratingPairs.append((i, j))
-        
-        return ratingPairs
+                    reduced = (g // gcd, d // gcd)
+                    if reduced in ratios_seen:
+                        continue
+                    ratios_seen.add(reduced)
+                pairs.append((g, d))
+
+        return pairs
     
     def createFile(self, thresholdFactor, ratingFactor, fileName):
         ratingPairs = self.getRatingPairs()
@@ -67,6 +62,7 @@ class shadMath:
 
 def main():
     test = shadMath()
-    test.createFile(1.5,0,"PvE")
+    print(test.createDistribution(1,1,3.8,.5))
+    #test.createFile(1.5,0,"PvE")
 
-#main()
+main()

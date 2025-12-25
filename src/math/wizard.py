@@ -15,17 +15,25 @@ else:
     print("Gear table not found, use optimizer.py to generate gear table")
     quit()
 
+if os.path.exists(os.path.join(DATAFRAME_ROOT, 'allthesets.pkl')):
+    SETS_TABLE = pd.read_pickle(os.path.join(DATAFRAME_ROOT, 'allthesets.pkl'))
+else:
+    print("Set table not found, use optimizer.py to generate gear table")
+    quit()
+
 WIZARD_STATS = wizardStats()
 
 class Wizard:
-    def __init__(self, school: str, level: int, gear: pd.DataFrame, weave: str | None = "Universal"):
+    def __init__(self, school: str, level: int, weave: str | None = "Universal"):
         self.school = school
         self.weave = weave
         self.level = level
-        self.gear = gear
+        self.gear = None
         self.jewels = None
         self.pet = None
+        self.itemCards = []
         self.gearTable = GEAR_TABLE
+        self.setBonusTable = SETS_TABLE
         self.stats = pd.Series()
 
     def addAllStats(self, statPerJewelType: dict, pet: Pet):
@@ -47,12 +55,43 @@ class Wizard:
         baseStats = WIZARD_STATS.getBaseStats(school=self.school,level=self.level).select_dtypes(include="number").squeeze()
         self.stats = self.stats.add(baseStats, fill_value=0)
 
-    def addGearStats(self):
+    def addGearStats(self, gear: pd.DataFrame):
+        self.gear = gear
         gearStats = self.gear.select_dtypes(include="number").sum().squeeze()
         self.stats = self.stats.add(gearStats, fill_value=0)
     
-    def addJewelStats(self, statPerJewelType: dict):
-        self.generateTables()
+    def addGearStatsAutofill(self, gear: dict):
+        gearFrame = pd.concat(
+        [
+            GEAR_TABLE[
+                (GEAR_TABLE["Kind"] == kind) &
+                (GEAR_TABLE["Display"].str.contains(substring, case=False, na=False, regex=False)) &
+                (
+                    (GEAR_TABLE["School"] == self.school) |
+                    (GEAR_TABLE["School"] == 'Universal')
+                )
+            ]
+            for kind, substring in gear.items()
+        ],
+        ignore_index=True
+        )
+
+        gearFrame = (
+            gearFrame
+                .sort_values("Level", ascending=False)
+                .drop_duplicates(subset=["Kind"], keep="first")
+                .reset_index(drop=True)
+        )
+        
+        self.addGearStats(gearFrame)
+    
+    def addJewelStats(self, jewels: pd.DataFrame):
+        self.jewels = jewels
+        jewelStats = self.jewels.select_dtypes(include="number").sum().squeeze()
+        self.stats = self.stats.add(jewelStats, fill_value=0)
+
+    def addJewelStatsAutofill(self, statPerJewelType: dict):
+        self.generateJewelTables()
         jewelsAvailable = self.jewelSummation()
         self.jewels = pd.DataFrame(columns=self.gear.index)
 
@@ -66,22 +105,9 @@ class Wizard:
 
         self.stats = self.stats.add(jewelStats, fill_value=0)
 
-    def addSetBonusStats(self):
-        return
-    
-    def addPetStats(self, pet: Pet):
-        self.pet = pet
-        self.stats = self.stats.add(pet.stats, fill_value=0)
-
-    def jewelSummation(self):
-        totalJewels = list(filter(None, '|'.join(self.gear['Jewels'].astype(str)).split('|')))
-        totalJewels = dict(Counter(totalJewels))
-        return totalJewels
-    
-    def generateTables(self):
+    def generateJewelTables(self):
         # Only appropriate level jewels available for the weave combo allowed
-        masterystring = f"All schools except {self.school}"
-        self.gearTable = self.gearTable[~(self.gearTable["School"] == masterystring)]
+        self.gearTable = self.gearTable[~(self.gearTable["School"] == f"All schools except {self.school}")]
 
         self.jewelTable = self.gearTable[
                                         (self.gearTable['Kind'] == "Jewel") &
@@ -100,6 +126,11 @@ class Wizard:
                                         )
                                     ]
 
+    def jewelSummation(self):
+        totalJewels = list(filter(None, '|'.join(self.gear['Jewels'].astype(str)).split('|')))
+        totalJewels = dict(Counter(totalJewels))
+        return totalJewels
+
     def optimalJewel(self, stats: list[str], type: str):
         specifiedJewelTable = self.jewelTable[
             (self.jewelTable["Jewel Type"] == type) &
@@ -114,3 +145,11 @@ class Wizard:
         table = table.sort_values(by=stats, ascending=[False] * len(stats))
         optimal = table.iloc[0]
         return optimal
+    
+    def addPetStats(self, pet: Pet):
+        self.pet = pet
+        self.stats = self.stats.add(pet.stats, fill_value=0)
+    
+    def addSetBonusStats(self):
+        
+        return

@@ -204,6 +204,10 @@ class wizardStats:
 
 def main():
     woop = wizardStats()
-    print(woop.getBaseStats("Storm", 180))
-    print(woop.getCaps("Storm", 180))
-main()
+    for school in SCHOOLS:
+            caps = woop.statCaps[(woop.statCaps['School'] == school)]
+            print(caps)
+            for col in caps:
+                if not caps[col].is_monotonic_increasing:
+                    print(f"{school} {col}")
+#main()
