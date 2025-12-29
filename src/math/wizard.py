@@ -30,11 +30,12 @@ class Wizard:
         self.school = school
         self.weave = weave
         self.level = level
-        self.gear = None
-        self.pet = None
+        self.gear = gear
+        self.pet = pet
         self.gearTable = GEAR_TABLE
         self.setBonusTable = SETS_TABLE
         self.stats = pd.Series()
+        self.addAllStats()
 
     def addAllStats(self):
         self.addBaseStats()
@@ -58,56 +59,6 @@ class Wizard:
         gearStats = self.gear.select_dtypes(include="number").sum().squeeze()
         self.stats = self.stats.add(gearStats, fill_value=0)
     
-    def gearStatsAutofill(self, gearDisplayNames: dict | None = pd.DataFrame(),
-                                jewelDisplayNames: list | None = []):
-        gearFrame = pd.concat(
-        [
-            GEAR_TABLE[
-                (GEAR_TABLE["Kind"] == kind) &
-                (GEAR_TABLE["Display"].str.contains(substring, case=False, na=False, regex=False)) &
-                (
-                    (GEAR_TABLE["School"] == self.school) |
-                    (GEAR_TABLE["School"] == 'Universal')
-                ) &
-                (GEAR_TABLE["Level"] <= self.level)
-            ]
-            for kind, substring in gearDisplayNames.items()
-        ],
-        ignore_index=True
-        )
-
-        gearFrame = (
-            gearFrame
-                .sort_values("Level", ascending=False)
-                .drop_duplicates(subset=["Kind"], keep="first")
-                .reset_index(drop=True)
-        )
-        
-        jewelFrame = pd.concat(
-        [
-            GEAR_TABLE[
-                (GEAR_TABLE["Kind"] == "Jewel") &
-                (GEAR_TABLE["Jewel Type"] == jewel["Type"]) &
-                (GEAR_TABLE["Display"].str.contains(jewel["Name"], case=False, na=False, regex=False)) &
-                (
-                    (GEAR_TABLE["School"] == self.school) |
-                    (GEAR_TABLE["School"] == 'Universal')
-                ) &
-                (GEAR_TABLE["Level"] <= self.level)
-            ]
-            for jewel in jewelDisplayNames
-        ],
-        ignore_index=True
-        )
-
-        jewelFrame = (
-            jewelFrame
-                .sort_values("Level", ascending=False)
-                .drop_duplicates(subset=["Kind"], keep="first")
-                .reset_index(drop=True)
-        )
-
-        return pd.concat([gearFrame, jewelFrame])
 
     def jewelSocketSummation(self):
         jewel_series = self.gear['Jewels'].astype(str).str.split('|').explode()
@@ -116,9 +67,8 @@ class Wizard:
         totalJewels = jewel_series.value_counts().to_dict()
         return totalJewels
 
-    def addPetStats(self, pet: Pet):
-        self.pet = pet
-        self.stats = self.stats.add(pet.stats, fill_value=0)
+    def addPetStats(self):
+        self.stats = self.stats.add(self.pet.stats, fill_value=0)
     
     def addSetBonusStats(self):
         gear_sets = self.gear[self.gear['Set'] != 'None']['Set']

@@ -40,7 +40,6 @@ def gearStatsAutofill(gearDisplayNames: dict | None = pd.DataFrame(),
     ],
     ignore_index=True
     )
-
     gearFrame = (
         gearFrame
             .sort_values("Level", ascending=False)
@@ -48,30 +47,21 @@ def gearStatsAutofill(gearDisplayNames: dict | None = pd.DataFrame(),
             .reset_index(drop=True)
     )
     
-    jewelFrame = pd.concat(
-    [
-        GEAR_TABLE[
-            (GEAR_TABLE["Kind"] == "Jewel") &
-            (GEAR_TABLE["Jewel Type"] == jewel["Type"]) &
-            (GEAR_TABLE["Display"].str.contains(jewel["Name"], case=False, na=False, regex=False)) &
-            (
-                (GEAR_TABLE["School"] == wizardSchool) |
-                (GEAR_TABLE["School"] == 'Universal')
-            ) &
-            (GEAR_TABLE["Level"] <= wizardLevel)
-        ]
-        for jewel in jewelDisplayNames
-    ],
-    ignore_index=True
-    )
-    print(jewelFrame)
-    jewelFrame = (
-        jewelFrame
-            .sort_values("Level", ascending=False)
-            .drop_duplicates(subset=["Type"], keep="first")
-            .reset_index(drop=True)
-    )
-    print(jewelFrame)
+    jewelFrame = pd.DataFrame()
+    for jewel in jewelDisplayNames:
+        bestMatch = GEAR_TABLE[
+                (GEAR_TABLE["Kind"] == "Jewel") &
+                (GEAR_TABLE["Jewel Type"] == jewel["Type"]) &
+                (GEAR_TABLE["Display"].str.contains(jewel["Name"], case=False, na=False, regex=False)) &
+                (
+                    (GEAR_TABLE["School"] == wizardSchool) |
+                    (GEAR_TABLE["School"] == 'Universal')
+                ) &
+                (GEAR_TABLE["Level"] <= wizardLevel)
+            ].sort_values("Level", ascending=False)
+        if len(bestMatch) > 0:
+            bestMatchRow = bestMatch.iloc[0:1]
+            jewelFrame = pd.concat([jewelFrame] + [bestMatchRow] * jewel["Quantity"], ignore_index=True)
     return pd.concat([gearFrame, jewelFrame],ignore_index=True)
 
 if __name__ == "__main__":
@@ -88,12 +78,12 @@ if __name__ == "__main__":
             }
     
     jewelNames = (
-        [{"Name": "Lightning Piercing", "Type": "Circle"}] * 5 +
-        [{"Name": "Flawless Health Opal", "Type": "Tear"}] * 3 +
-        [{"Name": "Bright Health Amethyst", "Type": "Square"}] * 2 +
-        [{"Name": "Fire Punishing", "Type": "Sword"}] * 2 +
-        [{"Name": "Fire Accurate", "Type": "Power"}] * 2 +
-        [{"Name": "Storm Mending", "Type": "Shield"}] * 2
+        {"Name": "Lightning Piercing", "Type": "Circle", "Quantity": 4},
+        {"Name": "Flawless Health Opal +155", "Type": "Tear", "Quantity": 3},
+        {"Name": "Bright Health Amethyst", "Type": "Square", "Quantity": 3},
+        {"Name": "Fire Punishing", "Type": "Sword", "Quantity": 5},
+        {"Name": "Fire Accurate", "Type": "Power", "Quantity": 4},
+        {"Name": "Storm Mending", "Type": "Shield", "Quantity": 1}
     )
 
     pet = Pet(name="FrostBeetleRain",
@@ -103,4 +93,4 @@ if __name__ == "__main__":
     gear = gearStatsAutofill(gearDisplayNames=gearNames, jewelDisplayNames=jewelNames)
     print(gear)
     wizard = Wizard(school=wizardSchool, level=wizardLevel, weave=wizardWeave, gear=gear, pet=pet)
-    print(wizard.getStats())
+    print(wizard.getStats(['Storm Damage', 'Storm Pierce', 'Storm Crit Rating', 'Resist', 'Block Rating', 'Health']))
