@@ -179,13 +179,13 @@ def main():
         wizardsGear[school] = gearFrame
 
     for school in wizardsGear:
-        wizards[school] = Wizard(school, level=180,gear=wizardsGear[school])
+        wizards[school] = Wizard(school,level=180,gear=wizardsGear[school],pet=Pet(talents=['Mighty', school+'-Bringer', 'Spell-Proof', 'Armor Breaker', 'Spell-Defying', 'Pain-Giver']))
         jewels = { "Tear": ["Health"],
                     "Circle": [school+" Pierce"],
                    "Square": ["Health"],
                    "Shield": ["Outgoing Healing"]}
         if school == "Life":
-            wizards[school].addAllStats(jewels, Pet(talents=['Mighty', school+'-Bringer', 'Spell-Proof', 'Armor Breaker', 'Spell-Defying', 'Pain-Giver']))
+            wizards[school].addAllStats(jewels, )
         else:
             wizards[school].addAllStats(jewels, Pet(talents=['Mighty', school+'-Dealer', 'Spell-Proof', 'Armor Breaker', 'Spell-Defying', 'Pain-Giver']))
         if school == "Fire":
