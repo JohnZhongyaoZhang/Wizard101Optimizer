@@ -36,10 +36,10 @@ class Wizard:
         self.setBonusTable = SETS_TABLE
         self.stats = pd.Series()
 
-    def addAllStats(self, statPerJewelType: dict, pet: Pet):
+    def addAllStats(self, gear: pd.DataFrame, jewels: pd.DataFrame, pet: Pet):
         self.addBaseStats()
-        self.addGearStats()
-        self.addJewelStats(statPerJewelType)
+        self.addGearStats(gear)
+        self.addJewelStats(jewels)
         self.addPetStats(pet)
         self.addSetBonusStats()
 
@@ -91,7 +91,7 @@ class Wizard:
         self.stats = self.stats.add(jewelStats, fill_value=0)
 
     def addJewelStatsAutofill(self, statPerJewelType: dict):
-        self.generateJewelTables()
+        generateJewelTables()
         jewelsAvailable = self.jewelSummation()
         self.jewels = pd.DataFrame(columns=self.gear.index)
 
@@ -105,51 +105,51 @@ class Wizard:
 
         self.stats = self.stats.add(jewelStats, fill_value=0)
 
-    def generateJewelTables(self):
-        # Only appropriate level jewels available for the weave combo allowed
-        self.gearTable = self.gearTable[~(self.gearTable["School"] == f"All schools except {self.school}")]
+        def generateJewelTables(self):
+            # Only appropriate level jewels available for the weave combo allowed
+            self.gearTable = self.gearTable[~(self.gearTable["School"] == f"All schools except {self.school}")]
 
-        self.jewelTable = self.gearTable[
-                                        (self.gearTable['Kind'] == "Jewel") &
-                                        (self.gearTable['Level'] <= self.level) &
-                                        (
-                                            (self.gearTable['School'] == self.school) |
-                                            (self.gearTable['School'] == "Universal") |
+            self.jewelTable = self.gearTable[
+                                            (self.gearTable['Kind'] == "Jewel") &
+                                            (self.gearTable['Level'] <= self.level) &
                                             (
-                                                self.gearTable['School'].str.contains("All schools except", na=False) &
-                                                ~self.gearTable['School'].str.contains(f"All schools except {self.school}", na=False)
+                                                (self.gearTable['School'] == self.school) |
+                                                (self.gearTable['School'] == "Universal") |
+                                                (
+                                                    self.gearTable['School'].str.contains("All schools except", na=False) &
+                                                    ~self.gearTable['School'].str.contains(f"All schools except {self.school}", na=False)
+                                                )
+                                            ) &
+                                            (
+                                                (self.gearTable['Weave'] == self.weave) |
+                                                (self.gearTable['Weave'] == "Universal")
                                             )
-                                        ) &
-                                        (
-                                            (self.gearTable['Weave'] == self.weave) |
-                                            (self.gearTable['Weave'] == "Universal")
-                                        )
-                                    ]
+                                        ]
+
+        def optimalJewel(self, stats: list[str], type: str):
+            specifiedJewelTable = self.jewelTable[
+                (self.jewelTable["Jewel Type"] == type) &
+                (self.jewelTable[stats].gt(0).any(axis=1))
+            ]
+
+            if specifiedJewelTable.empty:
+                print("No matching jewels found.")
+                return None
+
+            table = specifiedJewelTable.copy()
+            table = table.sort_values(by=stats, ascending=[False] * len(stats))
+            optimal = table.iloc[0]
+            return optimal
 
     def jewelSummation(self):
         totalJewels = list(filter(None, '|'.join(self.gear['Jewels'].astype(str)).split('|')))
         totalJewels = dict(Counter(totalJewels))
         return totalJewels
 
-    def optimalJewel(self, stats: list[str], type: str):
-        specifiedJewelTable = self.jewelTable[
-            (self.jewelTable["Jewel Type"] == type) &
-            (self.jewelTable[stats].gt(0).any(axis=1))
-        ]
-
-        if specifiedJewelTable.empty:
-            print("No matching jewels found.")
-            return None
-
-        table = specifiedJewelTable.copy()
-        table = table.sort_values(by=stats, ascending=[False] * len(stats))
-        optimal = table.iloc[0]
-        return optimal
-    
     def addPetStats(self, pet: Pet):
         self.pet = pet
         self.stats = self.stats.add(pet.stats, fill_value=0)
     
     def addSetBonusStats(self):
-        
+        setCounter = Counter(self.gear[self.gear['Set'] != 'None']['Set'])
         return

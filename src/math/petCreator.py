@@ -11,6 +11,12 @@ else:
     print("Selfish talent table not found.")
     quit()
 
+if os.path.exists(os.path.join(DATAFRAME_ROOT, 'allthepets.pkl')):
+    PETS_TABLE = pd.read_pickle(os.path.join(DATAFRAME_ROOT, 'allthepets.pkl'))
+else:
+    print("Pet table not found.")
+    quit()
+
 if os.path.exists(os.path.join(DATAFRAME_ROOT, 'combattalents.pkl')):
     COMBAT_TALENTS = pd.read_pickle(os.path.join(DATAFRAME_ROOT, 'combattalents.pkl'))
 else:
@@ -18,7 +24,7 @@ else:
     quit()
 
 class Pet:
-    def __init__(self, body="Generic", talents=[], strength=255,intellect=250,agility=260,will=260,power=250):
+    def __init__(self, name="Generic", talents=[], strength=255,intellect=250,agility=260,will=260,power=250):
         self.petStats = pd.Series(data={"Strength": strength,
                       "Intellect": intellect,
                       "Agility": agility,
@@ -27,12 +33,25 @@ class Pet:
         self.talents = talents
         self.stats = pd.Series()
         # TBI
-        self.body = body
+        self.name = name
+        self.display = None
+        self.set = None
         self.cards = []
         self.selfishTalents = SELFISH_TALENTS
         self.combatTalents = COMBAT_TALENTS
         self.processTalents()
+        self.processName()
     
+
+    def processName(self):
+        if self.name == "Generic":
+            return
+        self.cards = PETS_TABLE[PETS_TABLE["Name"] == self.name]["Cards"].item().split("|")
+        self.display = PETS_TABLE[PETS_TABLE["Name"] == self.name]["Display"].item()
+        self.set = PETS_TABLE[PETS_TABLE["Name"] == self.name]["Set"].item()
+        self.stats = self.stats.add(PETS_TABLE[PETS_TABLE["Name"] == self.name].select_dtypes(include="number").squeeze(), fill_value=0)
+        
+
     def processTalents(self):
         selfishTalents = self.selfishTalents[self.selfishTalents["Name"].isin(self.talents)].copy()
         combatTalents = self.combatTalents[self.combatTalents["Name"].isin(self.talents)].copy()
@@ -60,8 +79,6 @@ class Pet:
         expanded.index = expanded.index.map(" ".join)
         self.stats = self.stats.add(expanded, fill_value=0)
 
-def main():
-    tester = Pet(talents=['Mighty', 'Fire-Dealer', 'Spell-Proof', 'Fire-Giver', 'Spell-Defying', 'Pain-Giver'])
+if __name__ == "__main__":
+    tester = Pet(name="SkeletonArmored", talents=['Mighty', 'Fire-Dealer', 'Spell-Proof', 'Fire-Giver', 'Spell-Defying', 'Pain-Giver'])
     print(tester.stats)
-
-#main()

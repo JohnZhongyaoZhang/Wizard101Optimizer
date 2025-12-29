@@ -62,7 +62,7 @@ class shadMath:
 
 def main():
     test = shadMath()
-    print(test.createDistribution(1,1,3.8,.5))
+    print(test.createDistribution(159,142,5,.75))
     #test.createFile(1.5,0,"PvE")
 
 main()
