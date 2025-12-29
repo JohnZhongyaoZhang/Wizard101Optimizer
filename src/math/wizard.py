@@ -4,15 +4,10 @@ from src.math.petCreator import Pet
 import pandas as pd
 import os
 
-DATAFRAME_ROOT = os.path.join('src', 'data', 'dataframes')
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
+DATAFRAME_ROOT = os.path.join(PROJECT_ROOT, 'src', 'data', 'dataframes')
 JEWEL_TYPES = ["Circle", "Star", "Tear", "Square", "Shield", "Sword", "Power"]
-
-if os.path.exists(os.path.join(DATAFRAME_ROOT, 'allthegear.pkl')):
-    GEAR_TABLE = pd.read_pickle(os.path.join(DATAFRAME_ROOT, 'allthegear.pkl'))
-else:
-    print("Gear table not found, use optimizer.py to generate gear table")
-    quit()
-
 if os.path.exists(os.path.join(DATAFRAME_ROOT, 'allthesets.pkl')):
     SETS_TABLE = pd.read_pickle(os.path.join(DATAFRAME_ROOT, 'allthesets.pkl'))
 else:
@@ -25,53 +20,45 @@ class Wizard:
     def __init__(self, school: str,
                         level: int,
                         weave: str | None = "Universal",
-                        gear: pd.DataFrame | None = pd.DataFrame(),
-                        pet: Pet | None = Pet()):
+                        items: pd.DataFrame | None = pd.DataFrame(),
+                        ):
         self.school = school
         self.weave = weave
         self.level = level
-        self.gear = gear
-        self.pet = pet
-        self.gearTable = GEAR_TABLE
+        self.items = items
         self.setBonusTable = SETS_TABLE
         self.stats = pd.Series()
         self.addAllStats()
 
+
+    def wizardSummary(self, statFilter=None):
+        statsDisplay = self.stats.drop("Level")
+        statsDisplay = statsDisplay[statsDisplay != 0]
+        if statFilter:
+            statsDisplay = statsDisplay.reindex(statFilter).dropna()
+        return {
+            "School": self.school,
+            "Weave": self.weave,
+            "Level": self.level,
+            "Items": self.items,
+            "Stats": statsDisplay
+        }
+
     def addAllStats(self):
         self.addBaseStats()
-        self.addGearStats()
-        self.addPetStats()
+        self.additemstats()
         self.addSetBonusStats()
-
-    def getStats(self, statFilter=None):
-        self.stats = self.stats.drop("Level")
-        self.stats = self.stats[self.stats != 0]
-        if statFilter:
-            return self.stats[statFilter]
-        else:
-            return self.stats
 
     def addBaseStats(self):
         baseStats = WIZARD_STATS.getBaseStats(school=self.school,level=self.level).select_dtypes(include="number").squeeze()
         self.stats = self.stats.add(baseStats, fill_value=0)
 
-    def addGearStats(self):
-        gearStats = self.gear.select_dtypes(include="number").sum().squeeze()
-        self.stats = self.stats.add(gearStats, fill_value=0)
-    
+    def additemstats(self):
+        itemStats = self.items.select_dtypes(include="number").sum().squeeze()
+        self.stats = self.stats.add(itemStats, fill_value=0)
 
-    def jewelSocketSummation(self):
-        jewel_series = self.gear['Jewels'].astype(str).str.split('|').explode()
-        jewel_series = jewel_series[jewel_series != 'None']
-        jewel_series = jewel_series[jewel_series != '']
-        totalJewels = jewel_series.value_counts().to_dict()
-        return totalJewels
-
-    def addPetStats(self):
-        self.stats = self.stats.add(self.pet.stats, fill_value=0)
-    
     def addSetBonusStats(self):
-        gear_sets = self.gear[self.gear['Set'] != 'None']['Set']
+        gear_sets = self.items[self.items['Set'] != 'None']['Set']
         set_counts_series = gear_sets.value_counts()
         
         if (set_counts_series > 2).any():

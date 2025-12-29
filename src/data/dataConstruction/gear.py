@@ -68,8 +68,10 @@ CLEANUPQUERIES = ["ALTER TABLE refinedcombination DROP COLUMN name",
 
 JEWEL_TYPES = ["Circle", "Star", "Tear", "Square", "Shield", "Sword", "Power"]
 JEWEL_TYPES_SET = set(JEWEL_TYPES) 
-DATABASE_ROOT = os.path.join('src', 'data', 'databases')
-DATAFRAME_ROOT = os.path.join('src', 'data', 'dataframes')
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(SCRIPT_DIR)))
+DATABASE_ROOT = os.path.join(PROJECT_ROOT, 'src', 'data', 'databases')
+DATAFRAME_ROOT = os.path.join(PROJECT_ROOT, 'src', 'data', 'dataframes')
 
 class Gear:
     def __init__(self):

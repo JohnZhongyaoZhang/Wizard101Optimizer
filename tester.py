@@ -10,20 +10,17 @@ from src.math.wizmath import WizMath
 
 import os
 
-DATAFRAME_ROOT = os.path.join('src', 'data', 'dataframes')
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = SCRIPT_DIR
+DATAFRAME_ROOT = os.path.join(PROJECT_ROOT, 'src', 'data', 'dataframes')
 
 if os.path.exists(os.path.join(DATAFRAME_ROOT, 'allthegear.pkl')):
     GEAR_TABLE = pd.read_pickle(os.path.join(DATAFRAME_ROOT, 'allthegear.pkl'))
 else:
     print("Gear table not found, use optimizer.py to generate gear table")
-    quit()
+    quit() 
 
-
-wizardLevel = 180
-wizardSchool = "Storm"
-wizardWeave = "Fire"    
-
-def gearStatsAutofill(gearDisplayNames: dict | None = pd.DataFrame(),
+def gearStatsAutofill(wizardLevel: int, wizardSchool: str, wizardWeave: str, gearDisplayNames: dict | None = pd.DataFrame(),
                             jewelDisplayNames: list | None = []):
     gearFrame = pd.concat(
     [
@@ -46,7 +43,17 @@ def gearStatsAutofill(gearDisplayNames: dict | None = pd.DataFrame(),
             .drop_duplicates(subset=["Kind"], keep="first")
             .reset_index(drop=True)
     )
-    
+
+    return gearFrame
+
+def jewelSocketSummation(gear: pd.DataFrame):
+    jewel_series = gear['Jewels'].astype(str).str.split('|').explode()
+    jewel_series = jewel_series[jewel_series != 'None']
+    jewel_series = jewel_series[jewel_series != '']
+    totalJewels = jewel_series.value_counts().to_dict()
+    return totalJewels
+
+def jewelStatsAutofill(wizardLevel: int, wizardSchool: str, wizardWeave: str, jewelDisplayNames: list | None = []):
     jewelFrame = pd.DataFrame()
     for jewel in jewelDisplayNames:
         bestMatch = GEAR_TABLE[
@@ -62,35 +69,48 @@ def gearStatsAutofill(gearDisplayNames: dict | None = pd.DataFrame(),
         if len(bestMatch) > 0:
             bestMatchRow = bestMatch.iloc[0:1]
             jewelFrame = pd.concat([jewelFrame] + [bestMatchRow] * jewel["Quantity"], ignore_index=True)
-    return pd.concat([gearFrame, jewelFrame],ignore_index=True)
+    return jewelFrame
+
+def combineItemStats(gear: pd.DataFrame, jewel: pd.DataFrame, pet: Pet):
+    jewelsAndGear = pd.concat([gear, jewel],ignore_index=True)
+    return pd.concat([jewelsAndGear, pet.stats],ignore_index=True)
+
 
 if __name__ == "__main__":
+    wizardLevel = 180
+    wizardSchool = "Death"
+    wizardWeave = "Fire"
+
     gearNames = {
-            "Hat": "Crimefighter",
-            "Robe": "Monster Hide",
-            "Shoes": "Abomination",
-            "Weapon": "Rod",
+            "Hat": "Monster Hide",
+            "Robe": "Crimefighter",
+            "Shoes": "Private Eye",
+            "Weapon": "Malignant Aeon",
             "Athame": "Abomination",
             "Amulet": "Crimefighter",
             "Ring": "Abomination",
-            "Deck": "Crimefighter",
-            "Mount": "Clockwork Courser",
+            "Deck": "August Sage",
+            "Mount": "Stompy Bronto",
             }
     
+
+    gear = gearStatsAutofill(wizardLevel=wizardLevel, wizardSchool=wizardSchool, wizardWeave=wizardWeave, gearDisplayNames=gearNames)
+    jewelSlots = jewelSocketSummation(gear)
+
     jewelNames = (
-        {"Name": "Lightning Piercing", "Type": "Circle", "Quantity": 4},
-        {"Name": "Flawless Health Opal +155", "Type": "Tear", "Quantity": 3},
-        {"Name": "Bright Health Amethyst", "Type": "Square", "Quantity": 3},
-        {"Name": "Fire Punishing", "Type": "Sword", "Quantity": 5},
-        {"Name": "Fire Accurate", "Type": "Power", "Quantity": 4},
-        {"Name": "Storm Mending", "Type": "Shield", "Quantity": 1}
+        {"Name": "Ash Piercing", "Type": "Circle", "Quantity": jewelSlots["Circle"]},
+        {"Name": "Flawless Health Opal +155", "Type": "Tear", "Quantity": jewelSlots["Tear"]},
+        {"Name": "Bright Health Onyx", "Type": "Square", "Quantity": jewelSlots["Square"]},
+        {"Name": "Fire Punishing ", "Type": "Sword", "Quantity": jewelSlots["Sword"]},
+        {"Name": "Fire Accurate", "Type": "Power", "Quantity": jewelSlots["Power"]},
+        {"Name": "Death Mending", "Type": "Shield", "Quantity": jewelSlots["Shield"]}
     )
 
-    pet = Pet(name="FrostBeetleRain",
-            talents=['Mighty', wizardSchool+'-Dealer', 'Spell-Proof', 'Armor Breaker', 'Spell-Defying', 'Pain-Giver'])
+    jewels = jewelStatsAutofill(wizardLevel=wizardLevel, wizardSchool=wizardSchool, wizardWeave=wizardWeave, jewelDisplayNames=jewelNames)
     
-
-    gear = gearStatsAutofill(gearDisplayNames=gearNames, jewelDisplayNames=jewelNames)
-    print(gear)
-    wizard = Wizard(school=wizardSchool, level=wizardLevel, weave=wizardWeave, gear=gear, pet=pet)
-    print(wizard.getStats(['Storm Damage', 'Storm Pierce', 'Storm Crit Rating', 'Resist', 'Block Rating', 'Health']))
+    pet = Pet(name="PP_FrilledDino_A",
+            talents=['Mighty', wizardSchool+'-Dealer', 'Spell-Proof', 'Armor Breaker', 'Spell-Defying', 'Pip O\'Plenty'])
+    items = combineItemStats(gear, jewels, pet)
+    print(items)
+    wizard = Wizard(school=wizardSchool, level=wizardLevel, weave=wizardWeave, items=items)
+    print(wizard.wizardSummary([wizardSchool+' Damage', wizardSchool+' Pierce', wizardSchool+' Crit Rating', 'Resist', 'Block Rating', 'Health', 'Shadow Pip Stat Rating']))

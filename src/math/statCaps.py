@@ -138,7 +138,8 @@ LEVEL_SCALED_DATA_TABLE = {
     "m_level": f"Level"
 }
 
-FILE_ROOT = os.path.join("src", "math")
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+FILE_ROOT = SCRIPT_DIR
 
 def createCaps():
         tempData = []
@@ -210,4 +211,4 @@ def main():
             for col in caps:
                 if not caps[col].is_monotonic_increasing:
                     print(f"{school} {col}")
-#main()
+main()

@@ -49,8 +49,10 @@ INNER JOIN locale_en ON locale_en.id == pets.name
 WHERE pets.id == ?
 """
 
-DATABASE_ROOT = os.path.join('src', 'data', 'databases')
-DATAFRAME_ROOT = os.path.join('src', 'data', 'dataframes')
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(SCRIPT_DIR)))
+DATABASE_ROOT = os.path.join(PROJECT_ROOT, 'src', 'data', 'databases')
+DATAFRAME_ROOT = os.path.join(PROJECT_ROOT, 'src', 'data', 'dataframes')
 
 def remove_indices(lst, indices):
     return [value for index, value in enumerate(lst) if index not in indices]

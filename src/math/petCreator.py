@@ -1,7 +1,9 @@
 import os
 import pandas as pd
 
-DATAFRAME_ROOT = os.path.join('src', 'data', 'dataframes')
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
+DATAFRAME_ROOT = os.path.join(PROJECT_ROOT, 'src', 'data', 'dataframes')
 UNIVERSAL_STATS = ['Damage','Accuracy','Pierce','Resist','Crit Rating','Block Rating', 'Pip Conversion Rating']
 SCHOOLS = ['Fire', 'Ice', 'Storm', 'Balance', 'Life', 'Myth', 'Death']
 

@@ -19,8 +19,10 @@ INNER JOIN locale_en ON locale_en.id == mobs.name
 WHERE mobs.id == ?
 """
 
-DATABASE_ROOT = os.path.join('src', 'data', 'databases')
-DATAFRAME_ROOT = os.path.join('src', 'data', 'dataframes')
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(SCRIPT_DIR)))
+DATABASE_ROOT = os.path.join(PROJECT_ROOT, 'src', 'data', 'databases')
+DATAFRAME_ROOT = os.path.join(PROJECT_ROOT, 'src', 'data', 'dataframes')
 
 class Mobs:
     def __init__(self):

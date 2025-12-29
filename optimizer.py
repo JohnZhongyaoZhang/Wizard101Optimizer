@@ -10,7 +10,9 @@ from src.math.wizmath import WizMath
 
 import os
 
-DATAFRAME_ROOT = os.path.join('src', 'data', 'dataframes')
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = SCRIPT_DIR
+DATAFRAME_ROOT = os.path.join(PROJECT_ROOT, 'src', 'data', 'dataframes')
 
 class Optimizer:
     def __init__(self):
