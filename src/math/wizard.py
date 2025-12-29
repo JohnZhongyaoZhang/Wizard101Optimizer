@@ -26,7 +26,7 @@ class Wizard:
                         level: int,
                         weave: str | None = "Universal",
                         gear: pd.DataFrame | None = pd.DataFrame(),
-                        pet: Pet | None = pd.DataFrame()):
+                        pet: Pet | None = Pet()):
         self.school = school
         self.weave = weave
         self.level = level
@@ -68,7 +68,8 @@ class Wizard:
                 (
                     (GEAR_TABLE["School"] == self.school) |
                     (GEAR_TABLE["School"] == 'Universal')
-                )
+                ) &
+                (GEAR_TABLE["Level"] <= self.level)
             ]
             for kind, substring in gearDisplayNames.items()
         ],
@@ -86,11 +87,13 @@ class Wizard:
         [
             GEAR_TABLE[
                 (GEAR_TABLE["Kind"] == "Jewel") &
-                (GEAR_TABLE["Display"].str.contains(jewel, case=False, na=False, regex=False)) &
+                (GEAR_TABLE["Jewel Type"] == jewel["Type"]) &
+                (GEAR_TABLE["Display"].str.contains(jewel["Name"], case=False, na=False, regex=False)) &
                 (
                     (GEAR_TABLE["School"] == self.school) |
                     (GEAR_TABLE["School"] == 'Universal')
-                )
+                ) &
+                (GEAR_TABLE["Level"] <= self.level)
             ]
             for jewel in jewelDisplayNames
         ],
@@ -104,7 +107,7 @@ class Wizard:
                 .reset_index(drop=True)
         )
 
-        return pd.concat(gearFrame, jewelFrame)
+        return pd.concat([gearFrame, jewelFrame])
 
     def jewelSocketSummation(self):
         jewel_series = self.gear['Jewels'].astype(str).str.split('|').explode()

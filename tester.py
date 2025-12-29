@@ -12,57 +12,70 @@ import os
 
 DATAFRAME_ROOT = os.path.join('src', 'data', 'dataframes')
 
-class Optimizer:
-    def __init__(self):
-        self.gearTable = None
-        self.setTable = None
-        self.mobTable = None
+if os.path.exists(os.path.join(DATAFRAME_ROOT, 'allthegear.pkl')):
+    GEAR_TABLE = pd.read_pickle(os.path.join(DATAFRAME_ROOT, 'allthegear.pkl'))
+else:
+    print("Gear table not found, use optimizer.py to generate gear table")
+    quit()
 
-        self.generateTables()
 
-    def generateTables(self):
-        GeneratorClass = Gear()
-        MobClass = Mobs()
-        PetClass = Pets()
-        if os.path.exists(os.path.join(DATAFRAME_ROOT, 'allthegear.pkl')):
-            self.gearTable = pd.read_pickle(os.path.join(DATAFRAME_ROOT, 'allthegear.pkl'))
-        else:
-            print("Gear table not found, creating gear table")
-            self.gearTable = GeneratorClass.generateGear()
+wizardLevel = 180
+wizardSchool = "Storm"
+wizardWeave = "Fire"    
 
-        if os.path.exists(os.path.join(DATAFRAME_ROOT, 'allthesets.pkl')):
-            self.setTable = pd.read_pickle(os.path.join(DATAFRAME_ROOT, 'allthesets.pkl'))
-        else:
-            print("Set bonus table not found, creating set bonus table")
-            self.setTable = GeneratorClass.generateAllSets()
-        
-        if os.path.exists(os.path.join(DATAFRAME_ROOT, 'allthemobs.pkl')):
-            self.mobTable = pd.read_pickle(os.path.join(DATAFRAME_ROOT, 'allthemobs.pkl'))
-        else:
-            print("Mob table not found, creating mob table")
-            self.mobTable = MobClass.generateMobs()
-            
-        if os.path.exists(os.path.join(DATAFRAME_ROOT, 'allthepets.pkl')):
-            self.petTable = pd.read_pickle(os.path.join(DATAFRAME_ROOT, 'allthepets.pkl'))
-        else:
-            print("Pet table not found, creating pet table")
-            self.petTable = PetClass.generatePets()
+def gearStatsAutofill(gearDisplayNames: dict | None = pd.DataFrame(),
+                            jewelDisplayNames: list | None = []):
+    gearFrame = pd.concat(
+    [
+        GEAR_TABLE[
+            (GEAR_TABLE["Kind"] == kind) &
+            (GEAR_TABLE["Display"].str.contains(substring, case=False, na=False, regex=False)) &
+            (
+                (GEAR_TABLE["School"] == wizardSchool) |
+                (GEAR_TABLE["School"] == 'Universal')
+            ) &
+            (GEAR_TABLE["Level"] <= wizardLevel)
+        ]
+        for kind, substring in gearDisplayNames.items()
+    ],
+    ignore_index=True
+    )
 
-        missingColumns = self.gearTable.columns.difference(self.setTable.columns)
-
-        self.setTable = pd.concat(
-        [self.setTable, pd.DataFrame(0, index=self.setTable.index, columns=missingColumns)],
-        axis=1
-        )
+    gearFrame = (
+        gearFrame
+            .sort_values("Level", ascending=False)
+            .drop_duplicates(subset=["Kind"], keep="first")
+            .reset_index(drop=True)
+    )
+    
+    jewelFrame = pd.concat(
+    [
+        GEAR_TABLE[
+            (GEAR_TABLE["Kind"] == "Jewel") &
+            (GEAR_TABLE["Jewel Type"] == jewel["Type"]) &
+            (GEAR_TABLE["Display"].str.contains(jewel["Name"], case=False, na=False, regex=False)) &
+            (
+                (GEAR_TABLE["School"] == wizardSchool) |
+                (GEAR_TABLE["School"] == 'Universal')
+            ) &
+            (GEAR_TABLE["Level"] <= wizardLevel)
+        ]
+        for jewel in jewelDisplayNames
+    ],
+    ignore_index=True
+    )
+    print(jewelFrame)
+    jewelFrame = (
+        jewelFrame
+            .sort_values("Level", ascending=False)
+            .drop_duplicates(subset=["Type"], keep="first")
+            .reset_index(drop=True)
+    )
+    print(jewelFrame)
+    return pd.concat([gearFrame, jewelFrame],ignore_index=True)
 
 if __name__ == "__main__":
-    TheOptimizer = Optimizer()
-
-    wizardLevel = 180
-    wizardSchool = "Storm"
-    wizardWeave = "Fire"    
-
-    gear = {
+    gearNames = {
             "Hat": "Crimefighter",
             "Robe": "Monster Hide",
             "Shoes": "Abomination",
@@ -71,6 +84,23 @@ if __name__ == "__main__":
             "Amulet": "Crimefighter",
             "Ring": "Abomination",
             "Deck": "Crimefighter",
-            "Mount": "Clockwork Courser"
-            "Jewel": "Polished"
+            "Mount": "Clockwork Courser",
             }
+    
+    jewelNames = (
+        [{"Name": "Lightning Piercing", "Type": "Circle"}] * 5 +
+        [{"Name": "Flawless Health Opal", "Type": "Tear"}] * 3 +
+        [{"Name": "Bright Health Amethyst", "Type": "Square"}] * 2 +
+        [{"Name": "Fire Punishing", "Type": "Sword"}] * 2 +
+        [{"Name": "Fire Accurate", "Type": "Power"}] * 2 +
+        [{"Name": "Storm Mending", "Type": "Shield"}] * 2
+    )
+
+    pet = Pet(name="FrostBeetleRain",
+            talents=['Mighty', wizardSchool+'-Dealer', 'Spell-Proof', 'Armor Breaker', 'Spell-Defying', 'Pain-Giver'])
+    
+
+    gear = gearStatsAutofill(gearDisplayNames=gearNames, jewelDisplayNames=jewelNames)
+    print(gear)
+    wizard = Wizard(school=wizardSchool, level=wizardLevel, weave=wizardWeave, gear=gear, pet=pet)
+    print(wizard.getStats())
