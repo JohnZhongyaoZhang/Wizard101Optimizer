@@ -26,37 +26,37 @@ else:
     quit()
 
 class Pet:
-    def __init__(self, name="Generic", talents=[], strength=255,intellect=250,agility=260,will=260,power=250):
+    def __init__(self, name="Generic", body="Generic", talents=[], strength=255,intellect=250,agility=260,will=260,power=250):
         self.petStats = pd.Series(data={"Strength": strength,
                       "Intellect": intellect,
                       "Agility": agility,
                       "Will": will,
                       "Power": power})
         self.talents = talents
-        self.stats = pd.Series()
-        # TBI
+        self.stats = pd.DataFrame(columns=PETS_TABLE.columns)
         self.name = name
-        self.display = None
-        self.set = None
-        self.cards = []
-        self.selfishTalents = SELFISH_TALENTS
-        self.combatTalents = COMBAT_TALENTS
+        self.body = body
+        self.processBody()
         self.processTalents()
-        self.processName()
-    
+        self.stats.reset_index(drop=True, inplace=True)
 
-    def processName(self):
-        if self.name == "Generic":
+    def processBody(self):
+        if self.body == "Generic":
+            row_data = {col: None for col in PETS_TABLE.columns}
+            row_data['Name'] = self.body
+            row_data['Display'] = self.name
+            row_data['Set'] = None
+            row_data['Cards'] = None
+            row_data['Level'] = 0
+            row_data['School'] = "Universal"
+            self.stats = pd.DataFrame([row_data])
             return
-        self.cards = PETS_TABLE[PETS_TABLE["Name"] == self.name]["Cards"].item().split("|")
-        self.display = PETS_TABLE[PETS_TABLE["Name"] == self.name]["Display"].item()
-        self.set = PETS_TABLE[PETS_TABLE["Name"] == self.name]["Set"].item()
-        self.stats = self.stats.add(PETS_TABLE[PETS_TABLE["Name"] == self.name].select_dtypes(include="number").squeeze(), fill_value=0)
+        self.stats = PETS_TABLE[PETS_TABLE["Name"] == self.body].copy()
         
 
     def processTalents(self):
-        selfishTalents = self.selfishTalents[self.selfishTalents["Name"].isin(self.talents)].copy()
-        combatTalents = self.combatTalents[self.combatTalents["Name"].isin(self.talents)].copy()
+        selfishTalents = SELFISH_TALENTS[SELFISH_TALENTS["Name"].isin(self.talents)].copy()
+        combatTalents = COMBAT_TALENTS[COMBAT_TALENTS["Name"].isin(self.talents)].copy()
 
         self.petStats = self.petStats.add(
             selfishTalents.select_dtypes(include="number").sum().squeeze(), fill_value=0
@@ -72,15 +72,18 @@ class Pet:
             ) + combatTalents["Constant Value Override"]
         ).round()
 
-        self.stats = combatTalents.groupby("Stat")["Value"].sum()
-
-        universalStats = self.stats[self.stats.index.isin(UNIVERSAL_STATS)]
+        preUniversalStats = combatTalents.groupby("Stat")["Value"].sum()
+        universalStats = preUniversalStats[preUniversalStats.index.isin(UNIVERSAL_STATS)]
         schoolAndStatCombinations = pd.MultiIndex.from_product([SCHOOLS, universalStats.index],
                                         names=["School", "Stat"])
-        expanded = pd.Series(universalStats.reindex(schoolAndStatCombinations.get_level_values("Stat")).values, index=schoolAndStatCombinations)
-        expanded.index = expanded.index.map(" ".join)
-        self.stats = self.stats.add(expanded, fill_value=0)
+        universalExpanded = pd.Series(universalStats.reindex(schoolAndStatCombinations.get_level_values("Stat")).values, index=schoolAndStatCombinations)
+        universalExpanded.index = universalExpanded.index.map(" ".join)
+        
+        allStats = preUniversalStats.add(universalExpanded, fill_value=0)
+        self.stats[allStats.index] = allStats.to_numpy()
+        #for col in allStats.index:
+        #    self.stats[col] = allStats[col]
 
 if __name__ == "__main__":
-    tester = Pet(name="SkeletonArmored", talents=['Mighty', 'Fire-Dealer', 'Spell-Proof', 'Fire-Giver', 'Spell-Defying', 'Pain-Giver'])
+    tester = Pet(body="PP_FrilledDino_A",talents=['Mighty', 'Fire-Dealer', 'Spell-Proof', 'Fire-Giver', 'Spell-Defying', 'Pain-Giver'])
     print(tester.stats)

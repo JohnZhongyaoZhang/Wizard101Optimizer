@@ -1,8 +1,5 @@
 import pandas as pd
 
-from src.data.dataConstruction.gear import Gear
-from src.data.dataConstruction.mobs import Mobs
-from src.data.dataConstruction.pets import Pets
 from src.math.petCreator import Pet
 
 from src.math.wizard import Wizard
@@ -72,8 +69,7 @@ def jewelStatsAutofill(wizardLevel: int, wizardSchool: str, wizardWeave: str, je
     return jewelFrame
 
 def combineItemStats(gear: pd.DataFrame, jewel: pd.DataFrame, pet: Pet):
-    jewelsAndGear = pd.concat([gear, jewel],ignore_index=True)
-    return pd.concat([jewelsAndGear, pet.stats],ignore_index=True)
+    return pd.concat([gear, jewel, pet.stats],ignore_index=True)
 
 
 if __name__ == "__main__":
@@ -108,9 +104,8 @@ if __name__ == "__main__":
 
     jewels = jewelStatsAutofill(wizardLevel=wizardLevel, wizardSchool=wizardSchool, wizardWeave=wizardWeave, jewelDisplayNames=jewelNames)
     
-    pet = Pet(name="PP_FrilledDino_A",
+    pet = Pet(body="PP_FrilledDino_A",
             talents=['Mighty', wizardSchool+'-Dealer', 'Spell-Proof', 'Armor Breaker', 'Spell-Defying', 'Pip O\'Plenty'])
     items = combineItemStats(gear, jewels, pet)
-    print(items)
     wizard = Wizard(school=wizardSchool, level=wizardLevel, weave=wizardWeave, items=items)
     print(wizard.wizardSummary([wizardSchool+' Damage', wizardSchool+' Pierce', wizardSchool+' Crit Rating', 'Resist', 'Block Rating', 'Health', 'Shadow Pip Stat Rating']))

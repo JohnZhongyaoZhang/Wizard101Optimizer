@@ -1,5 +1,4 @@
 from src.math.statCaps import wizardStats
-from src.math.petCreator import Pet
 
 import pandas as pd
 import os
@@ -61,11 +60,9 @@ class Wizard:
         gear_sets = self.items[self.items['Set'] != 'None']['Set']
         set_counts_series = gear_sets.value_counts()
         
-        if (set_counts_series > 2).any():
+        if (set_counts_series >= 2).any():
             setBonusStats = self.setBonusTable[self.setBonusTable['Set'].isin(set_counts_series.index)]
-            
             set_counts = setBonusStats['Set'].map(set_counts_series)
             eligibleSetBonusStats = setBonusStats[setBonusStats['Pieces'] <= set_counts]
-            
             setBonusStatsSum = eligibleSetBonusStats.select_dtypes(include="number").sum().squeeze()
             self.stats = self.stats.add(setBonusStatsSum, fill_value=0)

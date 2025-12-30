@@ -202,13 +202,3 @@ class wizardStats:
 
     def getCaps(self, school: str, level: int):
         return self.statCaps[(self.statCaps['School'] == school) & (self.statCaps['Level'] == level)]
-
-def main():
-    woop = wizardStats()
-    for school in SCHOOLS:
-            caps = woop.statCaps[(woop.statCaps['School'] == school)]
-            print(caps)
-            for col in caps:
-                if not caps[col].is_monotonic_increasing:
-                    print(f"{school} {col}")
-main()
