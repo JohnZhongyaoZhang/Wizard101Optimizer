@@ -202,3 +202,6 @@ class wizardStats:
 
     def getCaps(self, school: str, level: int):
         return self.statCaps[(self.statCaps['School'] == school) & (self.statCaps['Level'] == level)]
+
+if __name__ == "__main__":
+    print(wizardStats().getCaps("Storm", 170)['Health'])

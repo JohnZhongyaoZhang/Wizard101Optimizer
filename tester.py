@@ -69,7 +69,15 @@ def jewelStatsAutofill(wizardLevel: int, wizardSchool: str, wizardWeave: str, je
     return jewelFrame
 
 def combineItemStats(gear: pd.DataFrame, jewel: pd.DataFrame, pet: Pet):
-    return pd.concat([gear, jewel, pet.stats],ignore_index=True)
+    combinedItems = pd.concat([gear, jewel, pet.stats], ignore_index=True)
+
+    numeric_cols = combinedItems.select_dtypes(include="number").columns
+    combinedItems[numeric_cols] = combinedItems[numeric_cols].fillna(0)
+
+    string_cols = combinedItems.select_dtypes(include="object").columns
+    combinedItems[string_cols] = combinedItems[string_cols].fillna('None')
+
+    return combinedItems
 
 
 if __name__ == "__main__":
